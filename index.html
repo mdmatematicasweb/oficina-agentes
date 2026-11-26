@@ -15,12 +15,20 @@ h1{font:700 clamp(28px,5vw,40px)/1.05 "Bricolage Grotesque",Inter,sans-serif;mar
 .walk{animation:bob .28s steps(2) infinite}.type{animation:tap .4s steps(2) infinite}
 @keyframes bob{50%{transform:translateY(-3px)}}@keyframes tap{50%{transform:translateY(2px)}}
 @media (prefers-reduced-motion:reduce){.walk,.type{animation:none}}
+.panels{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}@media(max-width:700px){.panels{grid-template-columns:1fr}}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 16px}.card h2{font:700 15px/1 "Bricolage Grotesque",Inter,sans-serif;margin:0 0 10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.chat{display:flex;flex-direction:column;gap:6px;max-height:210px;overflow:auto;font-size:14px}.chat .t{color:var(--muted);font-size:12px;margin-right:6px}.chat b{font-weight:600}
+.board{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:0;font-size:14px}.board dt{color:var(--muted)}.board dd{margin:0;font-weight:600;text-align:right}.ok{color:#1f9d78}.warn{color:#d8514a}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}.legend b{color:var(--fg)}
 #estado{font-size:13px;color:var(--muted)}
 </style></head><body><main>
 <div><h1>Oficina de agentes</h1><p class="sub" id="resumen">Cargando estado…</p></div>
 <div class="stage" id="stage"></div>
 <div id="estado"></div>
+<div class="panels">
+ <section class="card"><h2>Chat de la oficina</h2><div id="chat" class="chat"></div></section>
+ <section class="card"><h2>Tablero de control</h2><dl id="tablero" class="board"></dl></section>
+</div>
 <div class="legend"><span><b>Renato</b> redactor</span><span><b>Sebastián</b> supervisor</span><span><b>Lola</b> locutora</span><span><b>Edu</b> editor</span><span><b>Marta</b> redes sociales</span><span><b>Pablo</b> correo de la web</span><span><b>Vera</b> vigilante del sistema</span><span><b>Irene</b> profesora de tips</span><span><b>Bandeja</b> tu aprobación por Telegram</span></div>
 </main>
 <script>
@@ -30,16 +38,18 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const S={rr:8,font:'"Bricolage Grotesque",Inter,sans-serif',fs:13,wall:'#5EC4B6',floor:'#EBF8EE',desk:'#262A3D',deskTop:'#33384F',mon:'#262A3D',scr:'#FCE678',edge:'#262A3D',paper:'#fff',tray:'#FCE678',skin:'#F6CFB0',
  hair:{R:'#3b2a22',S:'#262A3D',L:'#8a4a3a',E:'#262A3D',M:'#5a3a6b',P:'#6b4a2a',V:'#2a2a2a',I:'#7a3b2e'},coat:{R:'#fff',S:'#262A3D',L:'#FCE678',E:'#F4736C',M:'#9AD9CF',P:'#C9B8F0',V:'#F4A261',I:'#E9C46A'},accent:'#F4736C',bub:'#fff',bubT:'#262A3D',okc:'#1f9d78',noc:'#d8514a'};
-const svg=el('svg',{viewBox:'0 0 800 460',role:'img','aria-label':'Oficina animada con cuatro agentes y una bandeja de aprobación'},document.getElementById('stage'));
-el('rect',{width:800,height:460,fill:S.floor},svg);el('rect',{width:800,height:56,fill:S.wall},svg);
+const svg=el('svg',{viewBox:'0 0 800 500',role:'img','aria-label':'Oficina animada con cuatro agentes y una bandeja de aprobación'},document.getElementById('stage'));
+el('rect',{width:800,height:500,fill:S.floor},svg);el('rect',{width:800,height:56,fill:S.wall},svg);
 el('rect',{x:280,y:8,width:240,height:40,rx:S.rr,fill:S.bub,stroke:S.edge,'stroke-width':2},svg);
 const board=el('text',{x:400,y:33,'text-anchor':'middle','font-family':S.font,'font-size':14,fill:S.bubT},svg);
 const P={R:{dx:60,dy:290,w:150,cx:135,cy:290,n:'RENATO'},S:{dx:560,dy:100,w:170,cx:645,cy:100,n:'SEBASTIÁN'},L:{dx:60,dy:90,w:150,cx:135,cy:90,n:'LOLA'},E:{dx:320,dy:340,w:170,cx:405,cy:340,n:'EDU'},M:{dx:330,dy:110,w:150,cx:405,cy:110,n:'MARTA'},P:{dx:470,dy:235,w:140,cx:540,cy:235,n:'PABLO'},V:{dx:190,dy:400,w:120,cx:250,cy:400,n:'VERA'},I:{dx:640,dy:250,w:120,cx:700,cy:250,n:'IRENE'}};
 for(const k in P){const q=P[k];el('rect',{x:q.dx,y:q.dy+10,width:q.w,height:46,rx:S.rr,fill:S.desk},svg);el('rect',{x:q.dx,y:q.dy,width:q.w,height:18,rx:S.rr,fill:S.deskTop},svg);
  el('rect',{x:q.dx+q.w/2-22,y:q.dy-30,width:44,height:30,rx:4,fill:S.mon,stroke:S.edge,'stroke-width':2},svg);el('rect',{x:q.dx+q.w/2-17,y:q.dy-25,width:34,height:20,fill:S.scr,opacity:.9},svg);
  el('text',{x:q.dx+q.w/2,y:q.dy+48,'text-anchor':'middle','font-family':S.font,'font-size':S.fs,fill:'#fff'},svg).textContent=q.n}
-const tray=el('g',{},svg);el('rect',{x:650,y:330,width:120,height:56,rx:S.rr,fill:S.tray,stroke:S.edge,'stroke-width':2},tray);el('rect',{x:660,y:322,width:100,height:14,rx:4,fill:S.paper,stroke:S.edge,'stroke-width':2},tray);
-const trayN=el('text',{x:710,y:365,'text-anchor':'middle','font-family':S.font,'font-size':16,fill:S.edge},tray);el('text',{x:710,y:402,'text-anchor':'middle','font-family':S.font,'font-size':S.fs,fill:S.edge},tray).textContent='PARA APROBAR';
+const tags={};
+for(const k in P){const q=P[k],g=el('g',{},svg);const bg=el('rect',{x:q.dx+q.w/2-55,y:q.dy+62,width:110,height:20,rx:10,fill:'#888'},g);const tx=el('text',{x:q.dx+q.w/2,y:q.dy+76,'text-anchor':'middle','font-family':S.font,'font-size':12,fill:'#fff'},g);tags[k]={bg,tx}}
+const tray=el('g',{},svg);el('rect',{x:650,y:350,width:120,height:56,rx:S.rr,fill:S.tray,stroke:S.edge,'stroke-width':2},tray);el('rect',{x:660,y:342,width:100,height:14,rx:4,fill:S.paper,stroke:S.edge,'stroke-width':2},tray);
+const trayN=el('text',{x:710,y:385,'text-anchor':'middle','font-family':S.font,'font-size':16,fill:S.edge},tray);el('text',{x:710,y:422,'text-anchor':'middle','font-family':S.font,'font-size':S.fs,fill:S.edge},tray).textContent='PARA APROBAR';
 function place(o,x,y){o.mv.style.transform=`translate(${x}px,${y}px)`;o.x=x;o.y=y}
 function char(k){const root=el('g',{},svg),mv=el('g',{},root),bob=el('g',{},mv),c=S.coat[k],h=S.hair[k];
  el('rect',{x:-11,y:-24,width:8,height:24,rx:3,fill:S.edge},bob);el('rect',{x:3,y:-24,width:8,height:24,rx:3,fill:S.edge},bob);
@@ -68,7 +78,27 @@ let st={fase:'idle'};
 function fase(){ // render de >6 min = ya llegó el aviso a Telegram
  const ago=(Date.now()-Date.parse(st.actualizado||0))/60000;
  return st.fase==='render'&&ago>6?'aprobar':st.fase}
-function pinta(){board.textContent=`Hoy: ${st.listos||0} listos · ${st.rechazos||0} rechazos`;trayN.textContent=String(st.pendientes||0);
+const COLOR={trab:'#1f9d78',libre:'#7a8499',alerta:'#d8514a',espera:'#d8892a'};
+const COL_NOM={R:'Renato',S:'Sebastián',L:'Lola',E:'Edu',M:'Marta',P:'Pablo',V:'Vera',I:'Irene'};
+function estados(){const f=fase(),rd=Object.values(st.redes||{}).filter(v=>v==='ok').length,bz=Object.values(st.buzon||{}).filter(v=>v==='ok').length,sy=st.sistema||{},pf=st.profesor||{};
+ const r={R:['Libre','libre'],S:['Libre','libre'],L:['Libre','libre'],E:['Libre','libre'],M:[rd?'Vigilando redes':'Sin redes','libre'],P:[bz?'Buzón al día':'Sin buzón','libre'],V:[sy.estado==='alerta'?`${sy.avisos} aviso(s)`:'Sistema OK',sy.estado==='alerta'?'alerta':'trab'],I:[pf.pendientes?`${pf.pendientes} ficha(s) en cola`:'Libre',pf.pendientes?'espera':'libre']};
+ if(f==='redacta'){r.R=['Redactando','trab'];r.S=['Revisando','trab']}
+ else if(f==='voz')r.L=['Grabando voz','trab'];
+ else if(f==='render')r.E=['Renderizando','trab'];
+ else if(f==='aprobar'){r.E=['Esperando tu OK','espera']}
+ else if(f==='fallo')r.S=['Sin variante hoy','alerta'];
+ else if(f==='redes')r.M=['Revisando redes','trab'];
+ else if(f==='correo')r.P=['Leyendo correo','trab'];
+ else if(f==='tips')r.I=['Preparando ficha','trab'];
+ return r}
+function pintaPaneles(){const e=estados();let act=0;for(const k in e){const[t,c]=e[k];if(c==='trab'&&k!=='V')act++;tags[k].tx.textContent=t;tags[k].bg.setAttribute('fill',COLOR[c])}
+ const chat=document.getElementById('chat'),ev=(st.eventos||[]).slice().reverse();chat.textContent='';
+ if(!ev.length){chat.textContent='Sin eventos todavía.'}
+ ev.forEach(x=>{const d=document.createElement('div');const t=document.createElement('span');t.className='t';t.textContent=x.t;const b=document.createElement('b');b.textContent=x.quien+': ';d.append(t,b,document.createTextNode(x.texto));chat.appendChild(d)});
+ const sy=st.sistema||{},rd=Object.values(st.redes||{}).filter(v=>v==='ok').length+Object.values(st.buzon||{}).filter(v=>v==='ok').length;
+ const filas=[['Agentes activos',`${act} de 7`],['Vídeos esperando OK',st.pendientes||0],['Fichas esperando OK',(st.profesor||{}).pendientes||0],['Canales conectados',`${rd} de 4`],['Listos hoy / rechazos',`${st.listos||0} / ${st.rechazos||0}`],['Estado',sy.estado==='alerta'?'ATENCIÓN':'OPERATIVO']];
+ const b=document.getElementById('tablero');b.textContent='';filas.forEach(([k,v])=>{const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;if(k==='Estado')dd.className=v==='OPERATIVO'?'ok':'warn';b.append(dt,dd)})}
+function pinta(){pintaPaneles();board.textContent=`Hoy: ${st.listos||0} listos · ${st.rechazos||0} rechazos`;trayN.textContent=String(st.pendientes||0);
  const ago=Math.max(0,Math.round((Date.now()-Date.parse(st.actualizado||Date.now()))/60000));
  document.getElementById('resumen').textContent=`${st.pendientes||0} vídeo(s) esperando tu aprobación · ${st.aprobados||0} aprobados en total`;
  document.getElementById('estado').textContent=`Actualizado hace ${ago} min · fase: ${fase()}${st.detalle?' · '+st.detalle:''}`+(st.redes?' · redes: '+Object.entries({...st.redes,...(st.buzon||{})}).map(([k,v])=>k+' '+v).join(', '):'')}
@@ -77,7 +107,7 @@ async function ciclo(){const f=fase(),R=C.R,Sb=C.S,L=C.L,E=C.E;
  if(f==='redacta'){await allHome('R');typing(R,true);say(R,'Escribiendo la variante…');await sleep(3500);typing(R,false);R.paper.setAttribute('opacity',1);await walk(R,575,170,1800);say(Sb,'Revisando cuentas…');await sleep(2500);hush();R.paper.setAttribute('opacity',0);await walk(R,135,290,1800)}
  else if(f==='voz'){await allHome('L');typing(L,true);say(L,'Grabando la voz…');await sleep(4000)}
  else if(f==='render'){await allHome('E');typing(E,true);say(E,'Renderizando en GitHub (~3 min)');await sleep(4000)}
- else if(f==='aprobar'){await allHome('E');if(E.x!==640){E.paper.setAttribute('opacity',1);await walk(E,640,400,1500);E.paper.setAttribute('opacity',0)}say(E,'Listo: revísalo en Telegram',S.okc);await sleep(4000)}
+ else if(f==='aprobar'){await allHome('E');if(E.x!==640){E.paper.setAttribute('opacity',1);await walk(E,640,420,1500);E.paper.setAttribute('opacity',0)}say(E,'Listo: revísalo en Telegram',S.okc);await sleep(4000)}
  else if(f==='redes'){await allHome('M');typing(C.M,true);say(C.M,'Revisando comentarios y métricas…');await sleep(4000)}
  else if(f==='correo'){await allHome('P');typing(C.P,true);say(C.P,'Leyendo el correo de la web…');await sleep(4000)}
  else if(f==='tips'){await allHome('I');typing(C.I,true);say(C.I,'Preparando una ficha de tips…');await sleep(4000)}
