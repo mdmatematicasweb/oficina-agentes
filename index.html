@@ -47,7 +47,7 @@ h1{font:700 clamp(28px,5vw,40px)/1.05 "Bricolage Grotesque",Inter,sans-serif;mar
 <div class="legend"><span><b>Contenido</b> Renato, Sebastián</span><span><b>Estudio y vídeo</b> Lola, Edu</span><span><b>Sistemas</b> Vera</span><span><b>Redes y correo</b> Marta, Pablo</span><span><b>Despacho</b> tú (bandeja de aprobación)</span><span><b>Aula de tips</b> Irene</span></div>
 </main>
 <script>
-const W=26,H=20,OX=190,OY=30,CW=380,CH=262;
+const W=26,H=20,OX=162,OY=30,CW=380,CH=262;
 const cv=document.getElementById('cv'),cx=cv.getContext('2d'),ov=document.getElementById('ov');cv.width=CW;cv.height=CH;
 const iso=(x,y)=>[OX+(x-y)*8,OY+(x+y)*4];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -119,15 +119,16 @@ function dibuja(t){cx.fillStyle='#1b2030';cx.fillRect(0,0,CW,CH);
  ROOMS.forEach(back);back(HALL);
  ROOMS.filter(R=>R.x0===0).forEach(R=>{for(let y=R.y0;y<=R.y1;y++)items.push({k:-1+y+.1,d:()=>box(-1,y,1,1,16,0,sh(R.w,1.15),sh(R.w,.95),sh(R.w,.75))})});
  // tabiques bajos (entre salas y con el pasillo)
- const wall=(x,y,c)=>items.push({k:x+y+1,d:()=>box(x,y,1,1,8,0,sh(c,1.2),sh(c,.95),sh(c,.7))});
- for(let y=0;y<H;y++){if(!DOORS.some(d=>d[0]===9&&d[1]===y))wall(9,y,'#8a8478');if(!DOORS.some(d=>d[0]===16&&d[1]===y))wall(16,y,'#8a8478')}
- for(const yy of[6,13]){for(let x=0;x<=8;x++)wall(x,yy,'#8a8478');for(let x=17;x<=25;x++)wall(x,yy,'#8a8478')}
+ const wallH=(x,y,c)=>items.push({k:x+y+.9,d:()=>box(x,y+.35,1,.3,7,0,sh(c,1.25),sh(c,1),sh(c,.78))});
+ const wallV=(x,y,c)=>items.push({k:x+y+.9,d:()=>box(x+.35,y,.3,1,7,0,sh(c,1.25),sh(c,1),sh(c,.78))});
+ for(let y=0;y<H;y++){if(!DOORS.some(d=>d[0]===9&&d[1]===y))wallV(9,y,'#cfc8b8');if(!DOORS.some(d=>d[0]===16&&d[1]===y))wallV(16,y,'#cfc8b8')}
+ for(const yy of[6,13]){for(let x=0;x<=8;x++)wallH(x,yy,'#cfc8b8');for(let x=17;x<=25;x++)wallH(x,yy,'#cfc8b8')}
  // mesas
  for(const k in ST){const[x,y,w,d]=ST[k].desk,s=ST[k];
-  items.push({k:x+w+y+d-.2,d:()=>{box(x,y,w,d,6,0,'#b5835a','#8d5f3c','#6d482c');
-   if(k==='D'){box(x+1,y+.6,1.4,.8,2,6,'#2d3748','#1a202c','#111827')}
-   else{box(x+w/2-.6,y+.2,1.2,.5,5,6,'#1b2236',s.coat==='#ffffff'?'#FCE678':'#7ee0c3','#0f1424')}}})}
- EXTRA.forEach(e=>items.push({k:e[0]+e[2]+e[1]+e[3]-.2,d:()=>box(e[0],e[1],e[2],e[3],e[4],e[5],sh(e[6],1.2),e[6],sh(e[6],.7))}));
+  items.push({k:x+y+(w+d)/2-.3,d:()=>{box(x,y,w,d,5,0,'#b5835a','#8d5f3c','#6d482c');
+   if(k==='D'){box(x+1,y+.6,1.4,.8,2,5,'#2d3748','#1a202c','#111827')}
+   else{box(x+w/2-.6,y+.2,1.2,.5,5,5,'#1b2236',s.coat==='#ffffff'?'#FCE678':'#7ee0c3','#0f1424')}}})}
+ EXTRA.forEach(e=>items.push({k:e[0]+e[1]+(e[2]+e[3])/2-.3,d:()=>box(e[0],e[1],e[2],e[3],e[4],e[5],sh(e[6],1.2),e[6],sh(e[6],.7))}));
  items.push({k:TRAY[0]+1+TRAY[1]+1-.1,d:()=>box(TRAY[0],TRAY[1],1,1,3,6,'#FCE678','#d9bd4a','#b89c2a')});
  for(const k in AG){const a=AG[k];items.push({k:a.x+a.y+1.0,d:()=>dibujaAgente(a)})}
  items.sort((p,q)=>p.k-q.k);items.forEach(i=>i.d());
@@ -137,7 +138,7 @@ function dibuja(t){cx.fillStyle='#1b2030';cx.fillRect(0,0,CW,CH);
 // ---------- Superposición HTML ----------
 const els={};
 for(const k in ST){const d=document.createElement('div');d.className='ag';d.innerHTML='<div class="bub" style="display:none"></div><div class="pill"></div>';ov.appendChild(d);els[k]=d}
-ROOMS.forEach(R=>{const d=document.createElement('div');d.className='room';d.textContent=R.n;const[sx,sy]=iso((R.x0+R.x1)/2+.5,R.y0+.2);d.style.left=(sx/CW*100)+'%';d.style.top=((sy-12)/CH*100)+'%';ov.appendChild(d)});
+ROOMS.forEach(R=>{const d=document.createElement('div');d.className='room';d.textContent=R.n;const[sx,sy]=iso((R.x0+R.x1)/2+.5,R.y0-.4);d.style.left=(sx/CW*100)+'%';d.style.top=((sy-24)/CH*100)+'%';ov.appendChild(d)});
 const trayEl=document.createElement('div');trayEl.className='tray';{const[sx,sy]=iso(TRAY[0]+.5,TRAY[1]+.5);trayEl.style.left=(sx/CW*100)+'%';trayEl.style.top=((sy-14)/CH*100)+'%'}ov.appendChild(trayEl);
 function overlay(){for(const k in AG){const a=AG[k],e=els[k],[sx,sy]=iso(a.x+.5,a.y+.5);e.style.left=(sx/CW*100)+'%';e.style.top=((sy-17)/CH*100)+'%';
   const pill=e.querySelector('.pill');const nom=a.n;pill.innerHTML=nom+'<small>'+a.st[0]+'</small>';pill.style.background=COLOR[a.st[1]]||'#7a8499';
