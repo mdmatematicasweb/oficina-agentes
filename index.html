@@ -3,115 +3,224 @@
 <title>Oficina de agentes · MD Matemáticas</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&family=Inter:wght@400;600&display=swap">
 <style>
-:root{--bg:#EEF7F5;--fg:#262A3D;--muted:#5B6478;--card:#fff;--line:#CFE3DF}
+:root{--bg:#EEF7F5;--fg:#262A3D;--muted:#5B6478;--card:#fff;--line:#CFE3DF;--mint:#5EC4B6;--sun:#FCE678}
 @media (prefers-color-scheme:dark){:root{--bg:#171A26;--fg:#EAF1F0;--muted:#9AA5B8;--card:#212536;--line:#323850;color-scheme:dark}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Inter,system-ui,sans-serif;padding:28px 16px}
-main{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Inter,system-ui,sans-serif;padding:24px 16px}
+main{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 h1{font:700 clamp(28px,5vw,40px)/1.05 "Bricolage Grotesque",Inter,sans-serif;margin:0}
 .sub{color:var(--muted);margin:6px 0 0}
-.stage{border:2px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card)}
-.stage svg{display:block;width:100%;height:auto}
-.walk{animation:bob .28s steps(2) infinite}.type{animation:tap .4s steps(2) infinite}
-@keyframes bob{50%{transform:translateY(-3px)}}@keyframes tap{50%{transform:translateY(2px)}}
-@media (prefers-reduced-motion:reduce){.walk,.type{animation:none}}
+.stage{position:relative;border:2px solid var(--line);border-radius:14px;overflow:hidden;background:#1b2030}
+#cv{display:block;width:100%;height:auto;image-rendering:pixelated}
+#ov{position:absolute;inset:0;pointer-events:none}
+.ag{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:2px;white-space:nowrap}
+.pill{font:600 clamp(8px,1.05vw,12px)/1 Inter,sans-serif;color:#fff;padding:3px 7px;border-radius:9px;background:#7a8499}
+.pill small{font-weight:400;opacity:.9;margin-left:4px}
+.bub{font:600 clamp(9px,1.1vw,13px)/1.2 Inter,sans-serif;color:#262A3D;background:#fff;border:2px solid #262A3D;border-radius:8px;padding:3px 7px;max-width:190px;white-space:normal;text-align:center}
+.room{position:absolute;transform:translate(-50%,-50%);font:700 clamp(7px,.95vw,11px)/1 Inter,sans-serif;letter-spacing:.08em;color:#fff;background:rgba(38,42,61,.78);padding:3px 7px;border-radius:5px;white-space:nowrap}
+.tray{position:absolute;transform:translate(-50%,-50%);font:700 clamp(9px,1.2vw,14px)/1 Inter,sans-serif;color:#262A3D;background:#FCE678;border:2px solid #262A3D;border-radius:6px;padding:2px 6px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctl button,.ctl select{font:600 14px Inter,sans-serif;padding:8px 12px;border-radius:9px;border:2px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.ctl button.main{background:#262A3D;color:#FCE678;border-color:#262A3D}
+.ctl .prog{flex:1;min-width:140px;height:8px;border-radius:5px;background:var(--line);overflow:hidden}.ctl .prog i{display:block;height:100%;width:0;background:var(--mint)}
+#estado{font-size:13px;color:var(--muted)}
 .panels{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}@media(max-width:700px){.panels{grid-template-columns:1fr}}
 .card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 16px}.card h2{font:700 15px/1 "Bricolage Grotesque",Inter,sans-serif;margin:0 0 10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .chat{display:flex;flex-direction:column;gap:6px;max-height:210px;overflow:auto;font-size:14px}.chat .t{color:var(--muted);font-size:12px;margin-right:6px}.chat b{font-weight:600}
 .board{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:0;font-size:14px}.board dt{color:var(--muted)}.board dd{margin:0;font-weight:600;text-align:right}.ok{color:#1f9d78}.warn{color:#d8514a}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}.legend b{color:var(--fg)}
-#estado{font-size:13px;color:var(--muted)}
 </style></head><body><main>
 <div><h1>Oficina de agentes</h1><p class="sub" id="resumen">Cargando estado…</p></div>
-<div class="stage" id="stage"></div>
+<div class="stage"><canvas id="cv"></canvas><div id="ov"></div></div>
+<div class="ctl">
+ <button class="main" id="bPlay">▶ Reproducir el día</button>
+ <select id="sDia" aria-label="Día"></select>
+ <select id="sVel" aria-label="Velocidad"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select>
+ <button id="bVivo" hidden>● Volver al directo</button>
+ <div class="prog"><i id="pg"></i></div><span id="pgT" style="font-size:13px;color:var(--muted)"></span>
+</div>
 <div id="estado"></div>
 <div class="panels">
- <section class="card"><h2>Chat de la oficina</h2><div id="chat" class="chat"></div></section>
+ <section class="card"><h2 id="chatT">Chat de la oficina</h2><div id="chat" class="chat"></div></section>
  <section class="card"><h2>Tablero de control</h2><dl id="tablero" class="board"></dl></section>
 </div>
-<div class="legend"><span><b>Renato</b> redactor</span><span><b>Sebastián</b> supervisor</span><span><b>Lola</b> locutora</span><span><b>Edu</b> editor</span><span><b>Marta</b> redes sociales</span><span><b>Pablo</b> correo de la web</span><span><b>Vera</b> vigilante del sistema</span><span><b>Irene</b> profesora de tips</span><span><b>Bandeja</b> tu aprobación por Telegram</span></div>
+<div class="legend"><span><b>Contenido</b> Renato, Sebastián</span><span><b>Estudio y vídeo</b> Lola, Edu</span><span><b>Sistemas</b> Vera</span><span><b>Redes y correo</b> Marta, Pablo</span><span><b>Despacho</b> tú (bandeja de aprobación)</span><span><b>Aula de tips</b> Irene</span></div>
 </main>
 <script>
-const NS='http://www.w3.org/2000/svg';
-const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const W=26,H=20,OX=190,OY=30,CW=380,CH=262;
+const cv=document.getElementById('cv'),cx=cv.getContext('2d'),ov=document.getElementById('ov');cv.width=CW;cv.height=CH;
+const iso=(x,y)=>[OX+(x-y)*8,OY+(x+y)*4];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
-const S={rr:8,font:'"Bricolage Grotesque",Inter,sans-serif',fs:13,wall:'#5EC4B6',floor:'#EBF8EE',desk:'#262A3D',deskTop:'#33384F',mon:'#262A3D',scr:'#FCE678',edge:'#262A3D',paper:'#fff',tray:'#FCE678',skin:'#F6CFB0',
- hair:{R:'#3b2a22',S:'#262A3D',L:'#8a4a3a',E:'#262A3D',M:'#5a3a6b',P:'#6b4a2a',V:'#2a2a2a',I:'#7a3b2e'},coat:{R:'#fff',S:'#262A3D',L:'#FCE678',E:'#F4736C',M:'#9AD9CF',P:'#C9B8F0',V:'#F4A261',I:'#E9C46A'},accent:'#F4736C',bub:'#fff',bubT:'#262A3D',okc:'#1f9d78',noc:'#d8514a'};
-const svg=el('svg',{viewBox:'0 0 800 500',role:'img','aria-label':'Oficina animada con cuatro agentes y una bandeja de aprobación'},document.getElementById('stage'));
-el('rect',{width:800,height:500,fill:S.floor},svg);el('rect',{width:800,height:56,fill:S.wall},svg);
-el('rect',{x:280,y:8,width:240,height:40,rx:S.rr,fill:S.bub,stroke:S.edge,'stroke-width':2},svg);
-const board=el('text',{x:400,y:33,'text-anchor':'middle','font-family':S.font,'font-size':14,fill:S.bubT},svg);
-const P={R:{dx:60,dy:290,w:150,cx:135,cy:290,n:'RENATO'},S:{dx:560,dy:100,w:170,cx:645,cy:100,n:'SEBASTIÁN'},L:{dx:60,dy:90,w:150,cx:135,cy:90,n:'LOLA'},E:{dx:320,dy:340,w:170,cx:405,cy:340,n:'EDU'},M:{dx:330,dy:110,w:150,cx:405,cy:110,n:'MARTA'},P:{dx:470,dy:235,w:140,cx:540,cy:235,n:'PABLO'},V:{dx:190,dy:400,w:120,cx:250,cy:400,n:'VERA'},I:{dx:640,dy:250,w:120,cx:700,cy:250,n:'IRENE'}};
-for(const k in P){const q=P[k];el('rect',{x:q.dx,y:q.dy+10,width:q.w,height:46,rx:S.rr,fill:S.desk},svg);el('rect',{x:q.dx,y:q.dy,width:q.w,height:18,rx:S.rr,fill:S.deskTop},svg);
- el('rect',{x:q.dx+q.w/2-22,y:q.dy-30,width:44,height:30,rx:4,fill:S.mon,stroke:S.edge,'stroke-width':2},svg);el('rect',{x:q.dx+q.w/2-17,y:q.dy-25,width:34,height:20,fill:S.scr,opacity:.9},svg);
- el('text',{x:q.dx+q.w/2,y:q.dy+48,'text-anchor':'middle','font-family':S.font,'font-size':S.fs,fill:'#fff'},svg).textContent=q.n}
-const tags={};
-for(const k in P){const q=P[k],g=el('g',{},svg);const bg=el('rect',{x:q.dx+q.w/2-55,y:q.dy+62,width:110,height:20,rx:10,fill:'#888'},g);const tx=el('text',{x:q.dx+q.w/2,y:q.dy+76,'text-anchor':'middle','font-family':S.font,'font-size':12,fill:'#fff'},g);tags[k]={bg,tx}}
-const tray=el('g',{},svg);el('rect',{x:650,y:350,width:120,height:56,rx:S.rr,fill:S.tray,stroke:S.edge,'stroke-width':2},tray);el('rect',{x:660,y:342,width:100,height:14,rx:4,fill:S.paper,stroke:S.edge,'stroke-width':2},tray);
-const trayN=el('text',{x:710,y:385,'text-anchor':'middle','font-family':S.font,'font-size':16,fill:S.edge},tray);el('text',{x:710,y:422,'text-anchor':'middle','font-family':S.font,'font-size':S.fs,fill:S.edge},tray).textContent='PARA APROBAR';
-function place(o,x,y){o.mv.style.transform=`translate(${x}px,${y}px)`;o.x=x;o.y=y}
-function char(k){const root=el('g',{},svg),mv=el('g',{},root),bob=el('g',{},mv),c=S.coat[k],h=S.hair[k];
- el('rect',{x:-11,y:-24,width:8,height:24,rx:3,fill:S.edge},bob);el('rect',{x:3,y:-24,width:8,height:24,rx:3,fill:S.edge},bob);
- el('rect',{x:-17,y:-62,width:34,height:42,rx:6,fill:c,stroke:S.edge,'stroke-width':2},bob);el('rect',{x:-23,y:-58,width:8,height:28,rx:4,fill:c,stroke:S.edge,'stroke-width':2},bob);el('rect',{x:15,y:-58,width:8,height:28,rx:4,fill:c,stroke:S.edge,'stroke-width':2},bob);
- if(k==='S'){el('rect',{x:-3,y:-60,width:6,height:26,fill:S.accent},bob)}
- el('rect',{x:-13,y:-88,width:26,height:28,rx:13,fill:S.skin,stroke:S.edge,'stroke-width':2},bob);el('rect',{x:-14,y:-91,width:28,height:11,rx:6,fill:h},bob);
- if(k==='L'){el('rect',{x:-18,y:-80,width:6,height:14,rx:3,fill:S.accent,stroke:S.edge,'stroke-width':2},bob);el('rect',{x:12,y:-80,width:6,height:14,rx:3,fill:S.accent,stroke:S.edge,'stroke-width':2},bob)}
- if(k==='E'){el('rect',{x:-15,y:-95,width:30,height:8,rx:4,fill:S.accent},bob)}
- if(k==='I'){el('rect',{x:-15,y:-94,width:30,height:7,rx:3,fill:h},bob);el('rect',{x:14,y:-52,width:12,height:16,fill:'#fff',stroke:S.edge,'stroke-width':2},bob);el('rect',{x:-2,y:-44,width:4,height:14,fill:S.accent},bob)}
- if(k==='V'){el('rect',{x:-16,y:-82,width:32,height:6,fill:S.edge},bob);el('rect',{x:-18,y:-80,width:6,height:12,rx:3,fill:S.edge},bob);el('rect',{x:12,y:-80,width:6,height:12,rx:3,fill:S.edge},bob)}
- if(k==='P'){el('rect',{x:-14,y:-93,width:28,height:6,rx:3,fill:h},bob);el('rect',{x:-10,y:-62,width:20,height:6,fill:'#fff',opacity:.9},bob);el('rect',{x:-3,y:-60,width:6,height:16,fill:S.accent},bob)}
- if(k==='M'){el('rect',{x:-8,y:-102,width:16,height:12,rx:6,fill:h},bob);el('rect',{x:-14,y:-80,width:5,height:16,rx:3,fill:h},bob);el('rect',{x:9,y:-80,width:5,height:16,rx:3,fill:h},bob)}
- if(k==='S'){el('rect',{x:-10,y:-74,width:8,height:6,fill:'none',stroke:S.edge,'stroke-width':2},bob);el('rect',{x:2,y:-74,width:8,height:6,fill:'none',stroke:S.edge,'stroke-width':2},bob)}else{el('rect',{x:-7,y:-73,width:3,height:3,fill:S.edge},bob);el('rect',{x:4,y:-73,width:3,height:3,fill:S.edge},bob)}
- const paper=el('g',{opacity:0},bob);el('rect',{x:16,y:-52,width:18,height:22,fill:S.paper,stroke:S.edge,'stroke-width':2},paper);el('rect',{x:19,y:-45,width:12,height:3,fill:S.edge},paper);
- const o={mv,bob,paper};place(o,P[k].cx,P[k].cy);return o}
-const C={};['L','S','M','P','V','I','R','E'].forEach(k=>C[k]=char(k));
-const bubbles=el('g',{},svg);
-function say(o,text,color){bubbles.textContent='';const g=el('g',{},bubbles),t=el('text',{'font-family':S.font,'font-size':14,fill:color||S.bubT,'text-anchor':'middle'},g);t.textContent=text;
- const w=Math.min(t.getComputedTextLength()+22,380),bx=Math.max(8,Math.min(792-w,o.x-w/2)),by=Math.max(60,o.y-128);
- const bg=el('rect',{x:bx,y:by,width:w,height:30,rx:S.rr,fill:S.bub,stroke:S.edge,'stroke-width':2},g);el('path',{d:`M${o.x-6},${by+30} L${o.x},${by+40} L${o.x+6},${by+30}`,fill:S.bub,stroke:S.edge,'stroke-width':2},g);el('rect',{x:o.x-5,y:by+27,width:10,height:4,fill:S.bub},g);g.insertBefore(bg,t);t.setAttribute('x',bx+w/2);t.setAttribute('y',by+20)}
-const hush=()=>{bubbles.textContent=''};const typing=(o,on)=>o.bob.classList.toggle('type',on&&!reduce);
-async function walk(o,x,y,ms){o.mv.style.transition=`transform ${ms}ms linear`;o.bob.classList.add('walk');place(o,x,y);if(!reduce)await sleep(ms);o.bob.classList.remove('walk')}
-const home=k=>walk(C[k],P[k].cx,P[k].cy,1200);
-async function allHome(except){for(const k in C){typing(C[k],false);if(k!==except&&(C[k].x!==P[k].cx||C[k].y!==P[k].cy))home(k)}}
-let st={fase:'idle'};
-function fase(){ // render de >6 min = ya llegó el aviso a Telegram
- const ago=(Date.now()-Date.parse(st.actualizado||0))/60000;
- return st.fase==='render'&&ago>6?'aprobar':st.fase}
+let SPEED=1,runId=0;
+const fillPoly=(pts,c)=>{cx.fillStyle=c;cx.beginPath();pts.forEach(([a,b],i)=>i?cx.lineTo(a,b):cx.moveTo(a,b));cx.closePath();cx.fill()};
+function tile(x,y,c){const[sx,sy]=iso(x,y);cx.fillStyle=c;for(let r=0;r<8;r++){const w=r<4?4*(r+1):4*(8-r);cx.fillRect(sx-w/2,sy+r,w,1)}}
+function box(x,y,w,d,h,z,top,left,right){const p=(a,b,hh)=>{const[sx,sy]=iso(a,b);return[sx,sy-hh]};
+ fillPoly([p(x,y+d,z),p(x+w,y+d,z),p(x+w,y+d,z+h),p(x,y+d,z+h)],left);
+ fillPoly([p(x+w,y,z),p(x+w,y+d,z),p(x+w,y+d,z+h),p(x+w,y,z+h)],right);
+ fillPoly([p(x,y,z+h),p(x+w,y,z+h),p(x+w,y+d,z+h),p(x,y+d,z+h)],top)}
+const sh=(hex,f)=>{const n=parseInt(hex.slice(1),16);const c=v=>Math.max(0,Math.min(255,Math.round(v*f)));return'#'+[(n>>16)&255,(n>>8)&255,n&255].map(v=>c(v).toString(16).padStart(2,'0')).join('')};
+// ---------- Mapa ----------
+const ROOMS=[
+ {n:'CONTENIDO',x0:0,x1:8,y0:0,y1:5,c:'#d9c9a6',w:'#8a6a4a'},
+ {n:'ESTUDIO Y VÍDEO',x0:0,x1:8,y0:7,y1:12,c:'#c8b8e6',w:'#6b5a9a'},
+ {n:'SISTEMAS',x0:0,x1:8,y0:14,y1:19,c:'#b6c7d8',w:'#4a6078'},
+ {n:'REDES Y CORREO',x0:17,x1:25,y0:0,y1:5,c:'#bfe3d9',w:'#3a8a7a'},
+ {n:'DESPACHO DEL DIRECTOR',x0:17,x1:25,y0:7,y1:12,c:'#9fb0d6',w:'#35457a'},
+ {n:'AULA DE TIPS',x0:17,x1:25,y0:14,y1:19,c:'#f1e2a2',w:'#a8892a'}];
+const HALL={x0:10,x1:15,y0:0,y1:19,c:'#e8e3d8',w:'#9a958a'};
+const DOORS=[[9,3],[9,10],[9,17],[16,3],[16,10],[16,17]];
+// puestos: desk [x,y,w,d], seat
+const ST={
+ R:{n:'Renato',desk:[1,1,3,1],seat:[2,2],coat:'#ffffff',hair:'#3b2a22'},
+ S:{n:'Sebastián',desk:[5,1,3,1],seat:[6,2],coat:'#262A3D',hair:'#262A3D',tie:'#F4736C'},
+ L:{n:'Lola',desk:[1,8,3,1],seat:[2,9],coat:'#FCE678',hair:'#8a4a3a'},
+ E:{n:'Edu',desk:[5,8,3,1],seat:[6,9],coat:'#F4736C',hair:'#262A3D'},
+ V:{n:'Vera',desk:[1,15,3,1],seat:[2,16],coat:'#F4A261',hair:'#2a2a2a'},
+ M:{n:'Marta',desk:[18,1,3,1],seat:[19,2],coat:'#9AD9CF',hair:'#5a3a6b'},
+ P:{n:'Pablo',desk:[22,1,3,1],seat:[23,2],coat:'#C9B8F0',hair:'#6b4a2a'},
+ D:{n:'Tú',desk:[19,8,4,2],seat:[20,7],coat:'#3a3f55',hair:'#222',tie:'#FCE678'},
+ I:{n:'Irene',desk:[18,15,3,1],seat:[19,16],coat:'#E9C46A',hair:'#7a3b2e'}};
+const EXTRA=[ // muebles sin personaje [x,y,w,d,h,z,color]
+ [6,15,1,1,14,0,'#4a5568'],[7,15,1,1,14,0,'#4a5568'],[6,17,1,1,10,0,'#2d3748'],
+ [22,15,3,1,10,0,'#8a6a4a'],[11,0,1,1,8,0,'#3a8a4a'],[14,0,1,1,9,0,'#7a8499'],
+ [20,10,1,1,4,0,'#5a4a3a'],[21,10,1,1,4,0,'#5a4a3a']];
+const TRAY=[22,8];
+const blk=Array.from({length:H},()=>Array(W).fill(true));
+const isFloor=(x,y)=>(x>=0&&x<=8||x>=10&&x<=15||x>=17&&x<=25)&&y>=0&&y<H&&!(y===6||y===13);
+for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(isFloor(x,y))blk[y][x]=false;
+DOORS.forEach(([x,y])=>blk[y][x]=false);
+const block=(x,y,w,d)=>{for(let j=0;j<d;j++)for(let i=0;i<w;i++)blk[Math.floor(y+j)][Math.floor(x+i)]=true};
+for(const k in ST)block(...ST[k].desk);EXTRA.forEach(e=>block(e[0],e[1],e[2],e[3]));
+function bfs(a,b){const key=(x,y)=>y*W+x,prev=new Map([[key(...a),null]]),q=[a];
+ while(q.length){const c=q.shift();if(c[0]===b[0]&&c[1]===b[1])break;
+  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=c[0]+dx,ny=c[1]+dy;if(nx<0||ny<0||nx>=W||ny>=H||blk[ny][nx]||prev.has(key(nx,ny)))continue;prev.set(key(nx,ny),c);q.push([nx,ny])}}
+ if(!prev.has(key(...b)))return[];const path=[];let c=b;while(c){path.unshift(c);c=prev.get(key(...c))}return path.slice(1)}
+// ---------- Agentes ----------
+const AG={};for(const k in ST){const s=ST[k];AG[k]={k,...s,x:s.seat[0],y:s.seat[1],path:[],res:null,typing:false,paper:false,bub:null,bcol:null,st:['Libre','libre'],t:0}}
+function dibujaAgente(a){const[sx0,sy0]=iso(a.x+.5,a.y+.5);const fx=Math.round(sx0),fy=Math.round(sy0+3),mov=a.path.length>0,f=mov?Math.floor(a.t*6)%2:0,bob=mov?-(f):0;
+ const r=(c,x,y,w,h)=>{cx.fillStyle=c;cx.fillRect(fx+x,fy+y+bob,w,h)};
+ cx.fillStyle='rgba(0,0,0,.18)';cx.fillRect(fx-4,fy-1,8,2);
+ r('#1f2433',-3,-4,2,4+(f?0:0));r('#1f2433',1,-4+(f?-1:0),2,4);
+ r(a.coat,-4,-10,8,6);r(sh(a.coat,.82),-5,-9,1,5);r(sh(a.coat,.82),4,-9,1,5);
+ if(a.tie)r(a.tie,0,-10,1,5);
+ if(a.typing&&Math.floor(a.t*5)%2)r('#F6CFB0',-5,-5,1,1);
+ r('#F6CFB0',-3,-15,6,5);r(a.hair,-3,-16,6,2);r('#262A3D',-2,-13,1,1);r('#262A3D',1,-13,1,1);
+ if(a.paper)r('#ffffff',4,-9,3,4)}
+// ---------- Escena ----------
+function dibuja(t){cx.fillStyle='#1b2030';cx.fillRect(0,0,CW,CH);
+ const fl=(R)=>{for(let y=R.y0;y<=R.y1;y++)for(let x=R.x0;x<=R.x1;x++)tile(x,y,(x+y)%2?R.c:sh(R.c,.93))};
+ ROOMS.forEach(fl);fl(HALL);
+ DOORS.forEach(([x,y])=>tile(x,y,'#8b7a6a'));
+ // pasillo: alfombra central
+ for(let y=0;y<H;y++)for(let x=12;x<=13;x++)tile(x,y,(y)%2?'#c9c0d8':'#bfb6d0');
+ const items=[];
+ // paredes de fondo
+ const back=(R)=>{if(R.y0===0)for(let x=R.x0;x<=R.x1;x++)items.push({k:x+(-1)+1-0.5,d:()=>box(x,-1,1,1,16,0,sh(R.w,1.15),sh(R.w,.95),sh(R.w,.75))})};
+ ROOMS.forEach(back);back(HALL);
+ ROOMS.filter(R=>R.x0===0).forEach(R=>{for(let y=R.y0;y<=R.y1;y++)items.push({k:-1+y+.1,d:()=>box(-1,y,1,1,16,0,sh(R.w,1.15),sh(R.w,.95),sh(R.w,.75))})});
+ // tabiques bajos (entre salas y con el pasillo)
+ const wall=(x,y,c)=>items.push({k:x+y+1,d:()=>box(x,y,1,1,8,0,sh(c,1.2),sh(c,.95),sh(c,.7))});
+ for(let y=0;y<H;y++){if(!DOORS.some(d=>d[0]===9&&d[1]===y))wall(9,y,'#8a8478');if(!DOORS.some(d=>d[0]===16&&d[1]===y))wall(16,y,'#8a8478')}
+ for(const yy of[6,13]){for(let x=0;x<=8;x++)wall(x,yy,'#8a8478');for(let x=17;x<=25;x++)wall(x,yy,'#8a8478')}
+ // mesas
+ for(const k in ST){const[x,y,w,d]=ST[k].desk,s=ST[k];
+  items.push({k:x+w+y+d-.2,d:()=>{box(x,y,w,d,6,0,'#b5835a','#8d5f3c','#6d482c');
+   if(k==='D'){box(x+1,y+.6,1.4,.8,2,6,'#2d3748','#1a202c','#111827')}
+   else{box(x+w/2-.6,y+.2,1.2,.5,5,6,'#1b2236',s.coat==='#ffffff'?'#FCE678':'#7ee0c3','#0f1424')}}})}
+ EXTRA.forEach(e=>items.push({k:e[0]+e[2]+e[1]+e[3]-.2,d:()=>box(e[0],e[1],e[2],e[3],e[4],e[5],sh(e[6],1.2),e[6],sh(e[6],.7))}));
+ items.push({k:TRAY[0]+1+TRAY[1]+1-.1,d:()=>box(TRAY[0],TRAY[1],1,1,3,6,'#FCE678','#d9bd4a','#b89c2a')});
+ for(const k in AG){const a=AG[k];items.push({k:a.x+a.y+1.0,d:()=>dibujaAgente(a)})}
+ items.sort((p,q)=>p.k-q.k);items.forEach(i=>i.d());
+ // ventanas decorativas en pared de fondo
+ for(const[x0,R]of[[2,ROOMS[0]],[19,ROOMS[3]],[19,ROOMS[5]]]){}
+}
+// ---------- Superposición HTML ----------
+const els={};
+for(const k in ST){const d=document.createElement('div');d.className='ag';d.innerHTML='<div class="bub" style="display:none"></div><div class="pill"></div>';ov.appendChild(d);els[k]=d}
+ROOMS.forEach(R=>{const d=document.createElement('div');d.className='room';d.textContent=R.n;const[sx,sy]=iso((R.x0+R.x1)/2+.5,R.y0+.2);d.style.left=(sx/CW*100)+'%';d.style.top=((sy-12)/CH*100)+'%';ov.appendChild(d)});
+const trayEl=document.createElement('div');trayEl.className='tray';{const[sx,sy]=iso(TRAY[0]+.5,TRAY[1]+.5);trayEl.style.left=(sx/CW*100)+'%';trayEl.style.top=((sy-14)/CH*100)+'%'}ov.appendChild(trayEl);
+function overlay(){for(const k in AG){const a=AG[k],e=els[k],[sx,sy]=iso(a.x+.5,a.y+.5);e.style.left=(sx/CW*100)+'%';e.style.top=((sy-17)/CH*100)+'%';
+  const pill=e.querySelector('.pill');const nom=a.n;pill.innerHTML=nom+'<small>'+a.st[0]+'</small>';pill.style.background=COLOR[a.st[1]]||'#7a8499';
+  const b=e.querySelector('.bub');if(a.bub){b.style.display='block';b.textContent=a.bub;b.style.color=a.bcol||'#262A3D'}else b.style.display='none'}}
 const COLOR={trab:'#1f9d78',libre:'#7a8499',alerta:'#d8514a',espera:'#d8892a'};
-const COL_NOM={R:'Renato',S:'Sebastián',L:'Lola',E:'Edu',M:'Marta',P:'Pablo',V:'Vera',I:'Irene'};
+// ---------- Movimiento ----------
+let last=performance.now();
+function frame(now){const dt=Math.min(.1,(now-last)/1000);last=now;
+ for(const k in AG){const a=AG[k];a.t+=dt;if(a.path.length){const[tx,ty]=a.path[0],dx=tx-a.x,dy=ty-a.y,d=Math.hypot(dx,dy),step=3.2*SPEED*dt;
+   if(d<=step){a.x=tx;a.y=ty;a.path.shift();if(!a.path.length&&a.res){const r=a.res;a.res=null;r()}}else{a.x+=dx/d*step;a.y+=dy/d*step}}}
+ dibuja(now/1000);overlay();requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+const chk=my=>{if(runId!==my)throw'cancel'};
+const wait=async(ms,my)=>{await sleep(ms/SPEED);chk(my)};
+function goto(a,x,y,my){return new Promise(res=>{a.path=bfs([Math.round(a.x),Math.round(a.y)],[x,y]);if(!a.path.length){res();return}a.res=()=>{res()}}).then(()=>chk(my))}
+const home=(k,my)=>goto(AG[k],...AG[k].seat,my);
+const say=(a,t,c)=>{a.bub=t;a.bcol=c||null};const hush=()=>{for(const k in AG)AG[k].bub=null};
+async function trabajar(k,txt,ms,my,col){const a=AG[k];await home(k,my);a.typing=true;say(a,txt,col);await wait(ms,my);a.typing=false;a.bub=null}
+async function entregar(de,a,txt,ms,my,col){const A=AG[de],B=AG[a];A.paper=true;const[bx,by]=B.seat;
+ const dest=a==='D'?[TRAY[0],TRAY[1]+1]:(!blk[by][bx-1]?[bx-1,by]:[bx+1,by]);
+ await goto(A,dest[0],dest[1],my);say(B,txt,col);await wait(ms,my);B.bub=null;A.paper=false;await home(de,my)}
+// ---------- Estado vivo ----------
+let st={fase:'idle'},eventosVivo=[];
+function fase(){const ago=(Date.now()-Date.parse(st.actualizado||0))/60000;return st.fase==='render'&&ago>6?'aprobar':st.fase}
 function estados(){const f=fase(),rd=Object.values(st.redes||{}).filter(v=>v==='ok').length,bz=Object.values(st.buzon||{}).filter(v=>v==='ok').length,sy=st.sistema||{},pf=st.profesor||{};
- const r={R:['Libre','libre'],S:['Libre','libre'],L:['Libre','libre'],E:['Libre','libre'],M:[rd?'Vigilando redes':'Sin redes','libre'],P:[bz?'Buzón al día':'Sin buzón','libre'],V:[sy.estado==='alerta'?`${sy.avisos} aviso(s)`:'Sistema OK',sy.estado==='alerta'?'alerta':'trab'],I:[pf.pendientes?`${pf.pendientes} ficha(s) en cola`:'Libre',pf.pendientes?'espera':'libre']};
- if(f==='redacta'){r.R=['Redactando','trab'];r.S=['Revisando','trab']}
- else if(f==='voz')r.L=['Grabando voz','trab'];
- else if(f==='render')r.E=['Renderizando','trab'];
- else if(f==='aprobar'){r.E=['Esperando tu OK','espera']}
- else if(f==='fallo')r.S=['Sin variante hoy','alerta'];
- else if(f==='redes')r.M=['Revisando redes','trab'];
- else if(f==='correo')r.P=['Leyendo correo','trab'];
- else if(f==='tips')r.I=['Preparando ficha','trab'];
+ const r={R:['Libre','libre'],S:['Libre','libre'],L:['Libre','libre'],E:['Libre','libre'],M:[rd?'Vigilando':'Sin redes','libre'],P:[bz?'Al día':'Sin buzón','libre'],V:[sy.estado==='alerta'?`${sy.avisos} aviso(s)`:'Sistema OK',sy.estado==='alerta'?'alerta':'trab'],I:[pf.pendientes?`${pf.pendientes} en cola`:'Libre',pf.pendientes?'espera':'libre'],D:[(st.pendientes||0)?`${st.pendientes} por aprobar`:'Al día',(st.pendientes||0)?'espera':'libre']};
+ if(f==='redacta'){r.R=['Redactando','trab'];r.S=['Revisando','trab']}else if(f==='voz')r.L=['Grabando','trab'];else if(f==='render')r.E=['Renderizando','trab'];
+ else if(f==='aprobar')r.E=['Entregando','espera'];else if(f==='fallo')r.S=['Sin variante','alerta'];else if(f==='redes')r.M=['Revisando','trab'];else if(f==='correo')r.P=['Leyendo','trab'];else if(f==='tips')r.I=['Preparando','trab'];
  return r}
-function pintaPaneles(){const e=estados();let act=0;for(const k in e){const[t,c]=e[k];if(c==='trab'&&k!=='V')act++;tags[k].tx.textContent=t;tags[k].bg.setAttribute('fill',COLOR[c])}
- const chat=document.getElementById('chat'),ev=(st.eventos||[]).slice().reverse();chat.textContent='';
- if(!ev.length){chat.textContent='Sin eventos todavía.'}
- ev.forEach(x=>{const d=document.createElement('div');const t=document.createElement('span');t.className='t';t.textContent=x.t;const b=document.createElement('b');b.textContent=x.quien+': ';d.append(t,b,document.createTextNode(x.texto));chat.appendChild(d)});
+let modo='vivo';
+function paneles(){const e=estados();let act=0;
+ for(const k in e){if(e[k][1]==='trab'&&k!=='V')act++;if(modo==='vivo')AG[k].st=e[k]}
+ const evs=(modo==='vivo'?eventosVivo:replayShown).slice().reverse(),chat=document.getElementById('chat');chat.textContent='';
+ if(!evs.length)chat.textContent='Sin eventos todavía.';
+ evs.forEach(x=>{const d=document.createElement('div'),t=document.createElement('span');t.className='t';t.textContent=x.t;const b=document.createElement('b');b.textContent=x.quien+': ';d.append(t,b,document.createTextNode(x.texto));chat.appendChild(d)});
  const sy=st.sistema||{},rd=Object.values(st.redes||{}).filter(v=>v==='ok').length+Object.values(st.buzon||{}).filter(v=>v==='ok').length;
  const filas=[['Agentes activos',`${act} de 7`],['Vídeos esperando OK',st.pendientes||0],['Fichas esperando OK',(st.profesor||{}).pendientes||0],['Canales conectados',`${rd} de 4`],['Listos hoy / rechazos',`${st.listos||0} / ${st.rechazos||0}`],['Estado',sy.estado==='alerta'?'ATENCIÓN':'OPERATIVO']];
- const b=document.getElementById('tablero');b.textContent='';filas.forEach(([k,v])=>{const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;if(k==='Estado')dd.className=v==='OPERATIVO'?'ok':'warn';b.append(dt,dd)})}
-function pinta(){pintaPaneles();board.textContent=`Hoy: ${st.listos||0} listos · ${st.rechazos||0} rechazos`;trayN.textContent=String(st.pendientes||0);
+ const b=document.getElementById('tablero');b.textContent='';filas.forEach(([k,v])=>{const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;if(k==='Estado')dd.className=v==='OPERATIVO'?'ok':'warn';b.append(dt,dd)});
+ trayEl.textContent=st.pendientes||0;
  const ago=Math.max(0,Math.round((Date.now()-Date.parse(st.actualizado||Date.now()))/60000));
  document.getElementById('resumen').textContent=`${st.pendientes||0} vídeo(s) esperando tu aprobación · ${st.aprobados||0} aprobados en total`;
- document.getElementById('estado').textContent=`Actualizado hace ${ago} min · fase: ${fase()}${st.detalle?' · '+st.detalle:''}`+(st.redes?' · redes: '+Object.entries({...st.redes,...(st.buzon||{})}).map(([k,v])=>k+' '+v).join(', '):'')}
-async function cargar(){try{const r=await fetch('status.json?t='+Date.now(),{cache:'no-store'});st=await r.json();pinta()}catch(e){}}
-async function ciclo(){const f=fase(),R=C.R,Sb=C.S,L=C.L,E=C.E;
- if(f==='redacta'){await allHome('R');typing(R,true);say(R,'Escribiendo la variante…');await sleep(3500);typing(R,false);R.paper.setAttribute('opacity',1);await walk(R,575,170,1800);say(Sb,'Revisando cuentas…');await sleep(2500);hush();R.paper.setAttribute('opacity',0);await walk(R,135,290,1800)}
- else if(f==='voz'){await allHome('L');typing(L,true);say(L,'Grabando la voz…');await sleep(4000)}
- else if(f==='render'){await allHome('E');typing(E,true);say(E,'Renderizando en GitHub (~3 min)');await sleep(4000)}
- else if(f==='aprobar'){await allHome('E');if(E.x!==640){E.paper.setAttribute('opacity',1);await walk(E,640,420,1500);E.paper.setAttribute('opacity',0)}say(E,'Listo: revísalo en Telegram',S.okc);await sleep(4000)}
- else if(f==='redes'){await allHome('M');typing(C.M,true);say(C.M,'Revisando comentarios y métricas…');await sleep(4000)}
- else if(f==='correo'){await allHome('P');typing(C.P,true);say(C.P,'Leyendo el correo de la web…');await sleep(4000)}
- else if(f==='tips'){await allHome('I');typing(C.I,true);say(C.I,'Preparando una ficha de tips…');await sleep(4000)}
- else if(f==='fallo'){await allHome('S');say(Sb,'Hoy no salió variante verificada',S.noc);await sleep(4000)}
- else{await allHome();hush();say(R,'Esperando el próximo turno (08:00)');await sleep(3500);const rd=st.redes||{},con=Object.values(rd).filter(v=>v==='ok').length;say(C.M,con?`Vigilando ${con} red(es)`:'Sin redes conectadas aún',con?S.okc:S.noc);await sleep(3500);const bz=Object.values(st.buzon||{}).filter(v=>v==='ok').length;say(C.P,bz?'Buzón al día':'Sin buzón conectado aún',bz?S.okc:S.noc);await sleep(3500);const sy=st.sistema||{};const pf=st.profesor||{};say(C.I,pf.pendientes?`${pf.pendientes} ficha(s) esperan tu OK`:'Fichas de tips al día');await sleep(3500);say(C.V,sy.estado==='alerta'?`${sy.avisos} aviso(s) del sistema`:'Sistema en orden',sy.estado==='alerta'?S.noc:S.okc);await sleep(3500)}}
-(async()=>{await cargar();setInterval(cargar,30000);setInterval(pinta,60000);while(true){await ciclo()}})();
+ document.getElementById('estado').textContent=modo==='vivo'?`Directo · actualizado hace ${ago} min · fase: ${fase()}${st.detalle?' · '+st.detalle:''}`:'Reproduciendo el histórico del día';}
+async function cargar(){try{const r=await fetch('status.json?t='+Date.now(),{cache:'no-store'});st=await r.json();eventosVivo=st.eventos||[];paneles()}catch(e){}}
+async function ciclo(my){const f=fase();
+ if(f==='redacta'){await trabajar('R','Redactando la variante…',3000,my);await entregar('R','S','Revisando cuentas…',2500,my)}
+ else if(f==='voz')await trabajar('L','Grabando la voz…',4000,my);
+ else if(f==='render')await trabajar('E','Renderizando en GitHub (~3 min)',4000,my);
+ else if(f==='aprobar')await entregar('E','D','Listo: revísalo en Telegram',3500,my,'#1f9d78');
+ else if(f==='redes')await trabajar('M','Revisando comentarios y métricas…',4000,my);
+ else if(f==='correo')await trabajar('P','Leyendo el correo de la web…',4000,my);
+ else if(f==='tips')await trabajar('I','Preparando una ficha de tips…',4000,my);
+ else if(f==='fallo'){say(AG.S,'Hoy no salió variante verificada','#d8514a');await wait(3500,my);AG.S.bub=null}
+ else{ // reposo: alguien da una vuelta por el pasillo
+  const libres=['R','S','L','E','M','P','I'].filter(k=>true),k=libres[Math.floor(Math.random()*libres.length)],a=AG[k];
+  await goto(a,12+Math.floor(Math.random()*2),6+Math.floor(Math.random()*8),my);say(a,['Un café ☕','Todo tranquilo','Esperando el turno de las 08:00'][Math.floor(Math.random()*3)]);await wait(2500,my);a.bub=null;await home(k,my)}}
+async function vivo(){const my=++runId;modo='vivo';SPEED=1;hush();document.getElementById('bVivo').hidden=true;document.getElementById('bPlay').disabled=false;
+ try{while(runId===my)await ciclo(my)}catch(e){if(e!=='cancel')console.error(e)}}
+// ---------- Reproducción del día ----------
+const KEY={Renato:'R','Sebastián':'S',Lola:'L',Edu:'E',Marta:'M',Pablo:'P',Vera:'V',Irene:'I','Tú':'D'};
+let replayShown=[];
+async function reproducir(){const dia=document.getElementById('sDia').value;let ev;
+ try{const r=await fetch('historial/'+dia+'.json?t='+Date.now(),{cache:'no-store'});ev=await r.json()}catch(e){ev=[]}
+ if(!ev.length){document.getElementById('pgT').textContent='Sin eventos ese día';return}
+ const my=++runId;modo='replay';SPEED=+document.getElementById('sVel').value;hush();replayShown=[];paneles();
+ document.getElementById('bVivo').hidden=false;document.getElementById('bPlay').disabled=true;
+ for(const k in AG){AG[k].path=[];AG[k].res=null;AG[k].typing=false;AG[k].paper=false;AG[k].x=ST[k].seat[0];AG[k].y=ST[k].seat[1];AG[k].st=['Libre','libre']}
+ let prev=null;
+ try{for(let i=0;i<ev.length;i++){const e=ev[i],k=KEY[e.quien];SPEED=+document.getElementById('sVel').value;
+   document.getElementById('pg').style.width=(i/ev.length*100)+'%';document.getElementById('pgT').textContent=`${e.t} · ${i+1}/${ev.length}`;
+   replayShown.push(e);paneles();
+   if(!k){await wait(1500,my);continue}
+   const rojo=/rechazo|ninguna|error|aviso/i.test(e.texto)?'#d8514a':null;
+   for(const kk in AG)AG[kk].st=['Libre','libre'];AG[k].st=['Trabajando',rojo?'alerta':'trab'];
+   if(prev&&prev!==k&&k!=='D')await entregar(prev,k,e.texto,2200,my,rojo);
+   else if(k==='D'&&prev&&prev!=='D')await entregar(prev,'D',e.texto,2200,my,'#1f9d78');
+   else await trabajar(k,e.texto,2200,my,rojo);
+   prev=k}
+  document.getElementById('pg').style.width='100%';document.getElementById('pgT').textContent='Fin del día';await sleep(1500);}
+ catch(e){if(e!=='cancel')console.error(e);return}
+ vivo()}
+document.getElementById('bPlay').onclick=reproducir;document.getElementById('bVivo').onclick=()=>{document.getElementById('pg').style.width='0';document.getElementById('pgT').textContent='';vivo()};
+async function dias(){const sel=document.getElementById('sDia');let l=[];try{l=await (await fetch('historial/dias.json?t='+Date.now(),{cache:'no-store'})).json()}catch(e){}
+ l.slice().reverse().forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o)});
+ const o=document.createElement('option');o.value='ejemplo';o.textContent='Día de ejemplo (demo)';sel.appendChild(o)}
+(async()=>{await dias();await cargar();setInterval(cargar,30000);setInterval(paneles,60000);vivo()})();
 </script></body></html>
