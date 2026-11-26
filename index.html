@@ -138,7 +138,7 @@ function dibuja(t){cx.fillStyle='#1b2030';cx.fillRect(0,0,CW,CH);
 // ---------- Superposición HTML ----------
 const els={};
 for(const k in ST){const d=document.createElement('div');d.className='ag';d.innerHTML='<div class="bub" style="display:none"></div><div class="pill"></div>';ov.appendChild(d);els[k]=d}
-ROOMS.forEach(R=>{const d=document.createElement('div');d.className='room';d.textContent=R.n;const[sx,sy]=iso((R.x0+R.x1)/2+.5,R.y0-.4);d.style.left=(sx/CW*100)+'%';d.style.top=((sy-24)/CH*100)+'%';ov.appendChild(d)});
+ROOMS.forEach(R=>{const d=document.createElement('div');d.className='room';d.textContent=R.n;const[sx,sy]=iso(R.x1-.5,R.y1-.2);d.style.left=(sx/CW*100)+'%';d.style.top=((sy)/CH*100)+'%';ov.appendChild(d)});
 const trayEl=document.createElement('div');trayEl.className='tray';{const[sx,sy]=iso(TRAY[0]+.5,TRAY[1]+.5);trayEl.style.left=(sx/CW*100)+'%';trayEl.style.top=((sy-14)/CH*100)+'%'}ov.appendChild(trayEl);
 function overlay(){for(const k in AG){const a=AG[k],e=els[k],[sx,sy]=iso(a.x+.5,a.y+.5);e.style.left=(sx/CW*100)+'%';e.style.top=((sy-17)/CH*100)+'%';
   const pill=e.querySelector('.pill');const nom=a.n;pill.innerHTML=nom+'<small>'+a.st[0]+'</small>';pill.style.background=COLOR[a.st[1]]||'#7a8499';
