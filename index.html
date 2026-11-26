@@ -23,6 +23,7 @@ h1 span{color:var(--coral)}
  background-image:linear-gradient(#ff5a4f,#ff5a4f),linear-gradient(#ff5a4f,#ff5a4f),linear-gradient(#ff5a4f,#ff5a4f),linear-gradient(#ff5a4f,#ff5a4f),linear-gradient(#ff5a4f,#ff5a4f),linear-gradient(#ff5a4f,#ff5a4f),linear-gradient(#ff5a4f,#ff5a4f),linear-gradient(#ff5a4f,#ff5a4f);
  background-size:7px 2px,2px 7px,7px 2px,2px 7px,7px 2px,2px 7px,7px 2px,2px 7px;
  background-position:0 0,0 0,100% 0,100% 0,0 100%,0 100%,100% 100%,100% 100%;background-repeat:no-repeat}
+.dot{width:11px;height:11px;border-radius:50%;background:var(--c,#8a93a6);border:2px solid #0a0e1a;box-shadow:0 0 0 1px var(--c,#8a93a6)}.dot.esp{animation:lat 1s steps(2) infinite}@keyframes lat{50%{opacity:.25}}@media(prefers-reduced-motion:reduce){.dot.esp{animation:none}}
 .bub{font:400 clamp(11px,1.6vw,19px)/1.05 VT323,monospace;color:#10151f;background:#f4f7fb;border:2px solid #10151f;padding:2px 7px;max-width:210px;white-space:normal;text-align:center;box-shadow:2px 2px 0 rgba(0,0,0,.4)}
 .room{position:absolute;transform:translate(-50%,-50%);font:400 clamp(9px,1.25vw,15px)/1 VT323,monospace;letter-spacing:.12em;color:#cfe3ff;background:rgba(10,16,30,.78);border:1px solid #3a4a6e;padding:1px 6px;white-space:nowrap}
 .tray{position:absolute;transform:translate(-50%,-50%);font:400 clamp(12px,1.8vw,22px)/1 VT323,monospace;color:#10151f;background:#FFE66D;border:2px solid #10151f;padding:0 6px}
@@ -71,7 +72,7 @@ h1 span{color:var(--coral)}
  <section class="card"><h2 id="chatT">Chat de la oficina</h2><div id="chat" class="chat"></div></section>
  <section class="card"><h2>Tablero de control</h2><dl id="tablero" class="board"></dl></section>
 </div>
-<div class="legend"><span><b>Contenido</b> Renato, Sebastián</span><span><b>Estudio y vídeo</b> Lola, Edu</span><span><b>Sistemas</b> Vera</span><span><b>Redes y correo</b> Marta, Pablo</span><span><b>Despacho</b> tú (bandeja de aprobación)</span><span><b>I+D</b> Irene</span></div>
+<div class="legend"><span><b>Contenido</b> Renato, Sebastián</span><span><b>Estudio y vídeo</b> Lola, Edu</span><span><b>Sistemas</b> Vera</span><span><b>Redes y correo</b> Marta, Pablo</span><span><b>Despacho</b> tú (bandeja de aprobación)</span><span><b>I+D</b> Irene</span><span>Pasa el ratón (o toca) sobre un agente para ver su nombre y estado.</span></div>
 </main>
 <script>
 const W=26,H=20,OX=400,OY=96,CW=940,CH=580;
@@ -121,7 +122,7 @@ Object.assign(ST.R,{skin:'#f1c7a0',style:'short'});Object.assign(ST.S,{skin:'#c9
 Object.assign(ST.L,{skin:'#f6d3b3',style:'long'});Object.assign(ST.E,{skin:'#b87a52',style:'curly'});
 Object.assign(ST.V,{skin:'#e8b98f',style:'bun',glasses:true});Object.assign(ST.M,{skin:'#f1c7a0',style:'long'});
 Object.assign(ST.P,{skin:'#d9a27c',style:'short',beard:true});Object.assign(ST.D,{skin:'#8a5a3c',style:'short'});
-Object.assign(ST.I,{skin:'#f6d3b3',style:'bun'});
+Object.assign(ST.I,{skin:'#f6d3b3',style:'bun'});for(const k of['L','M','V','I'])ST[k].fem=true;
 // muebles sin personaje
 const EXTRA=[
  {t:'cab',x:6,y:15},{t:'cab',x:7,y:15},{t:'cpu',x:6,y:17},
@@ -143,36 +144,45 @@ const AG={};for(const k in ST){const s=ST[k];AG[k]={k,...s,x:s.seat[0],y:s.seat[
 const SKIN='#f3c9a5';
 function dibujaAgente(a){cx.save();const[sx0,sy0]=iso(a.x+.5,a.y+.5);const mov=a.path.length>0,f=mov?Math.floor(a.t*6)%2:0;
  const sit=!mov&&Math.abs(a.x-a.seat[0])<.05&&Math.abs(a.y-a.seat[1])<.05;
- const bob=mov?-f:0,front=mov&&a.face>0,SK=a.skin||SKIN,sd=sh(SK,.82);
+ const bob=mov?-f:0,front=mov&&a.face>0,SK=a.skin||SKIN,sd=sh(SK,.82),fem=!!a.fem;
  cx.translate(Math.round(sx0),Math.round(sy0+6)+(sit?6:0));cx.scale(2,2);
  cx.fillStyle='rgba(0,0,0,.3)';cx.fillRect(-6,-1,12,3);
  const parts=[];const add=(c,x,y,w,h)=>parts.push([c,x,y+bob,w,h]);
  const dk=sh(a.coat,.72),lt=sh(a.coat,1.25),hc=a.hair,long=a.style==='long';
- if(!sit){add('#1f2536',-3,-7,3,7+(f?-1:0));add('#1f2536',0,-7+(f?-1:0),3,7-(f?-1:0));add('#0d1019',-4,-1,4,1);add('#0d1019',0,-1,4,1)}
- if(long&&!front)add(hc,-5,-24,10,15);                  // melena por la espalda
- add(a.coat,-5,-17,10,10);add(dk,-5,-8,10,1);add(lt,-5,-17,2,3);add(lt,3,-17,2,3);
- add(dk,-7,-16,2,9);add(dk,5,-16,2,9);add(SK,-7,-7,2,2);add(SK,5,-7,2,2);
- if(front){add(a.shirt,-1,-17,2,5);if(a.tie)add(a.tie,0,-16,1,6)}else if(a.shirt){add(a.shirt,-2,-18,4,1)}
- add(SK,-1,-20,2,3);                                     // cuello
- add(SK,-4,-28,8,9);add(SK,-5,-25,1,3);add(SK,4,-25,1,3); // cabeza y orejas
- // peinado
- const top=a.style==='curly'?[-5,-31,10,5]:[-4,-30,8,4];
+ if(!sit){
+  if(fem){ // falda hasta la rodilla, piernas al aire y zapato de tacón
+   add(a.coat,-6,-9,12,5);add(dk,-6,-5,12,1);
+   add(sh(SK,.95),-3,-4,2,4+(f?-1:0));add(sh(SK,.95),1,-4+(f?-1:0),2,4-(f?-1:0));add('#a8323f',-4,-1,3,1);add('#a8323f',1,-1,3,1)}
+  else{add('#1f2536',-3,-7,3,7+(f?-1:0));add('#1f2536',0,-7+(f?-1:0),3,7-(f?-1:0));add('#0d1019',-4,-1,4,1);add('#0d1019',0,-1,4,1)}}
+ if(long&&!front)add(hc,-5,-26,10,17);                   // melena por la espalda
+ if(fem){add(a.coat,-4,-17,8,9);add(dk,-4,-10,8,1);add(lt,-4,-17,2,3);add(lt,2,-17,2,3);   // torso estrecho, cintura
+  add(dk,-6,-16,2,8);add(dk,4,-16,2,8);add(SK,-6,-8,2,2);add(SK,4,-8,2,2)}
+ else{add(a.coat,-5,-17,10,10);add(dk,-5,-8,10,1);add(lt,-5,-17,2,3);add(lt,3,-17,2,3);   // torso ancho, hombros anchos
+  add(dk,-7,-16,2,9);add(dk,5,-16,2,9);add(SK,-7,-7,2,2);add(SK,5,-7,2,2)}
+ if(front){add(a.shirt,-1,-17,2,fem?3:5);if(a.tie&&!fem)add(a.tie,0,-16,1,6)}else if(a.shirt&&!fem){add(a.shirt,-2,-18,4,1)}
+ add(SK,-1,-20,2,3);                                      // cuello
+ add(SK,-4,-28,8,9);add(SK,-5,-25,1,3);add(SK,4,-25,1,3);  // cabeza y orejas
+ const top=a.style==='curly'?[-5,-31,10,5]:(fem?[-5,-30,10,5]:[-4,-30,8,4]);
  add(hc,...top);
- if(front){add(hc,-4,-26,1,4);add(hc,3,-26,1,4);if(long){add(hc,-5,-26,2,11);add(hc,3,-26,2,11)}}
+ if(front){add(hc,-4,-26,1,4);add(hc,3,-26,1,4);if(long||fem){add(hc,-5,-27,2,13);add(hc,3,-27,2,13)}}
  else{add(hc,-4,-26,sit?4:8,6);if(a.style==='curly'){add(hc,-5,-27,1,5);add(hc,4,-27,1,5)}}
- if(a.style==='bun')add(hc,-1,-33,3,3);
+ if(a.style==='bun')add(hc,-2,-34,4,4);
  for(const[c,x,y,w,h]of parts){cx.fillStyle=OL;cx.fillRect(x-1,y-1,w+2,h+2)}
  for(const[c,x,y,w,h]of parts){cx.fillStyle=c;cx.fillRect(x,y,w,h)}
  const R=(c,x,y,w,h)=>{cx.fillStyle=c;cx.fillRect(x,y+bob,w,h)};
- if(front){ // rostro de frente
-  R('#2a1d18',-3,-25,2,1);R('#2a1d18',1,-25,2,1);                       // cejas
-  R('#ffffff',-3,-24,2,2);R('#ffffff',1,-24,2,2);R('#1b2a4a',-2,-24,1,2);R('#1b2a4a',2,-24,1,2); // ojos
-  R(sd,0,-22,1,2);R('#b5564f',-1,-20,2,1);R('#e8867e',-1,-20,1,1);       // nariz y boca
-  R('rgba(255,120,110,.35)',-4,-21,1,1);R('rgba(255,120,110,.35)',3,-21,1,1);
+ const lip=fem?'#d1303a':'#b5564f';
+ if(front){
+  R('#2a1d18',-3,-25,2,1);R('#2a1d18',1,-25,2,1);
+  R('#ffffff',-3,-24,2,2);R('#ffffff',1,-24,2,2);R('#1b2a4a',-2,-24,1,2);R('#1b2a4a',2,-24,1,2);
+  if(fem){R('#10151f',-4,-25,1,1);R('#10151f',3,-25,1,1);R('#10151f',-3,-26,1,1);R('#10151f',2,-26,1,1)} // pestañas
+  R(sd,0,-22,1,2);R(lip,-1,-20,2,1);if(fem){R('#ff8a8f',-1,-20,1,1);R('#d1303a',-1,-19,2,1)}
+  R('rgba(255,120,110,'+(fem?.55:.3)+')',-4,-21,1,1);R('rgba(255,120,110,'+(fem?.55:.3)+')',3,-21,1,1);
+  if(fem){R('#f3d68a',-5,-23,1,2);R('#f3d68a',4,-23,1,2);R('#f3d68a',0,-16,1,1)}   // pendientes y collar
   if(a.glasses){R('#10151f',-4,-25,4,1);R('#10151f',0,-25,4,1);R('#10151f',-4,-22,4,1);R('#10151f',0,-22,4,1);R('#10151f',-4,-25,1,4);R('#10151f',3,-25,1,4);R('#10151f',-1,-24,2,1)}
   if(a.beard){R(hc,-3,-20,6,2);R(hc,-4,-23,1,4);R(hc,3,-23,1,4);R('#b5564f',-1,-20,2,1)}
- }else if(sit){ // medio perfil hacia el espectador: se ve media cara
-  R('#2a1d18',0,-25,4,1);R('#ffffff',1,-24,2,2);R('#1b2a4a',2,-24,1,2);R(sd,4,-22,1,1);R('#b5564f',1,-20,2,1);R('rgba(255,120,110,.35)',0,-21,1,1);
+ }else if(sit){
+  R('#2a1d18',0,-25,4,1);R('#ffffff',1,-24,2,2);R('#1b2a4a',2,-24,1,2);R(sd,4,-22,1,1);R(lip,1,-20,2,1);R('rgba(255,120,110,.4)',0,-21,1,1);
+  if(fem){R('#10151f',3,-25,1,1);R('#f3d68a',4,-23,1,2);R('#d1303a',1,-19,2,1)}
   if(a.glasses){R('#10151f',0,-25,4,1);R('#10151f',0,-22,4,1);R('#10151f',0,-25,1,4);R('#10151f',3,-25,1,4)}
   if(a.beard){R(hc,0,-20,4,2);R(hc,3,-23,1,4)}}
  if(a.typing&&Math.floor(a.t*5)%2){cx.fillStyle=SK;cx.fillRect(-8,-9+bob,3,2);cx.fillRect(5,-8+bob,3,2)}
@@ -276,12 +286,18 @@ function dibuja(t){cx.fillStyle='#0a0e1a';cx.fillRect(0,0,CW,CH);
  items.sort((p,q)=>p.k-q.k);items.forEach(i=>i.d())}
 // ---------- Superposición HTML ----------
 const els={};
-for(const k in ST){const d=document.createElement('div');d.className='ag';d.innerHTML='<div class="bub" style="display:none"></div><div class="lab"><b></b><i></i></div>';ov.appendChild(d);els[k]=d}
+for(const k in ST){const d=document.createElement('div');d.className='ag';d.innerHTML='<div class="bub" style="display:none"></div><div class="lab" style="display:none"><b></b><i></i></div><div class="dot"></div>';ov.appendChild(d);els[k]=d}
 const trayEl=document.createElement('div');trayEl.className='tray';{const[sx,sy]=iso(TRAY[0]+.5,TRAY[1]+.5);trayEl.style.left=(sx/CW*100)+'%';trayEl.style.top=((sy-30)/CH*100)+'%'}ov.appendChild(trayEl);
+let hov=null;const stage=document.querySelector('.stage');
+function pick(ev){const r=cv.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*CW,y=(ev.clientY-r.top)/r.height*CH;let best=null,bd=1e9;
+ for(const k in AG){const a=AG[k],[sx,sy]=iso(a.x+.5,a.y+.5),fy=sy+6;if(x>sx-17&&x<sx+17&&y>fy-68&&y<fy+8){const d=Math.abs(x-sx)+Math.abs(y-(fy-30));if(d<bd){bd=d;best=k}}}return best}
+stage.addEventListener('pointermove',ev=>{if(ev.target.closest('.win')){hov=null;return}const k=pick(ev);if(k!==hov)hov=k;cv.style.cursor=k?'pointer':'default'});
+stage.addEventListener('pointerleave',()=>{hov=null});
+stage.addEventListener('pointerdown',ev=>{if(ev.pointerType!=='mouse'&&!ev.target.closest('.win')){const k=pick(ev);hov=(k&&k!==hov)?k:null}});
 const COLOR={trab:'#35d07f',libre:'#8a93a6',alerta:'#ff5a4f',espera:'#ff5a4f'};
-function overlay(){for(const k in AG){const a=AG[k],e=els[k],[sx,sy]=iso(a.x+.5,a.y+.5);e.style.left=(sx/CW*100)+'%';e.style.top=((sy-76)/CH*100)+'%';
+function overlay(){for(const k in AG){const a=AG[k],e=els[k],[sx,sy]=iso(a.x+.5,a.y+.5);e.style.left=(sx/CW*100)+'%';e.style.top=((sy-66)/CH*100)+'%';
   const lab=e.querySelector('.lab');lab.querySelector('b').textContent=a.rol+' '+a.n;const iEl=lab.querySelector('i');iEl.textContent=a.st[0];iEl.style.display=a.st[1]==='libre'?'none':'block';
-  lab.classList.toggle('esp',a.st[1]==='espera');e.style.setProperty('--c',COLOR[a.st[1]]||'#8a93a6');
+  lab.classList.toggle('esp',a.st[1]==='espera');lab.style.display=hov===k?'block':'none';const dot=e.querySelector('.dot');dot.classList.toggle('esp',a.st[1]==='espera'||a.st[1]==='alerta');e.style.zIndex=hov===k?5:1;e.style.setProperty('--c',COLOR[a.st[1]]||'#8a93a6');
   const b=e.querySelector('.bub');if(a.bub){b.style.display='block';b.textContent=a.bub;b.style.color=a.bcol||'#10151f'}else b.style.display='none'}}
 // ---------- Movimiento ----------
 let last=performance.now();
