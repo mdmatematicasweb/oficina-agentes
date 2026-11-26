@@ -21,7 +21,7 @@ h1{font:700 clamp(28px,5vw,40px)/1.05 "Bricolage Grotesque",Inter,sans-serif;mar
 <div><h1>Oficina de agentes</h1><p class="sub" id="resumen">Cargando estado…</p></div>
 <div class="stage" id="stage"></div>
 <div id="estado"></div>
-<div class="legend"><span><b>Renato</b> redactor</span><span><b>Sebastián</b> supervisor</span><span><b>Lola</b> locutora</span><span><b>Edu</b> editor</span><span><b>Bandeja</b> tu aprobación por Telegram</span></div>
+<div class="legend"><span><b>Renato</b> redactor</span><span><b>Sebastián</b> supervisor</span><span><b>Lola</b> locutora</span><span><b>Edu</b> editor</span><span><b>Marta</b> redes sociales</span><span><b>Bandeja</b> tu aprobación por Telegram</span></div>
 </main>
 <script>
 const NS='http://www.w3.org/2000/svg';
@@ -29,12 +29,12 @@ const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const S={rr:8,font:'"Bricolage Grotesque",Inter,sans-serif',fs:13,wall:'#5EC4B6',floor:'#EBF8EE',desk:'#262A3D',deskTop:'#33384F',mon:'#262A3D',scr:'#FCE678',edge:'#262A3D',paper:'#fff',tray:'#FCE678',skin:'#F6CFB0',
- hair:{R:'#3b2a22',S:'#262A3D',L:'#8a4a3a',E:'#262A3D'},coat:{R:'#fff',S:'#262A3D',L:'#FCE678',E:'#F4736C'},accent:'#F4736C',bub:'#fff',bubT:'#262A3D',okc:'#1f9d78',noc:'#d8514a'};
+ hair:{R:'#3b2a22',S:'#262A3D',L:'#8a4a3a',E:'#262A3D',M:'#5a3a6b'},coat:{R:'#fff',S:'#262A3D',L:'#FCE678',E:'#F4736C',M:'#9AD9CF'},accent:'#F4736C',bub:'#fff',bubT:'#262A3D',okc:'#1f9d78',noc:'#d8514a'};
 const svg=el('svg',{viewBox:'0 0 800 460',role:'img','aria-label':'Oficina animada con cuatro agentes y una bandeja de aprobación'},document.getElementById('stage'));
 el('rect',{width:800,height:460,fill:S.floor},svg);el('rect',{width:800,height:56,fill:S.wall},svg);
 el('rect',{x:280,y:8,width:240,height:40,rx:S.rr,fill:S.bub,stroke:S.edge,'stroke-width':2},svg);
 const board=el('text',{x:400,y:33,'text-anchor':'middle','font-family':S.font,'font-size':14,fill:S.bubT},svg);
-const P={R:{dx:60,dy:290,w:150,cx:135,cy:290,n:'RENATO'},S:{dx:560,dy:100,w:170,cx:645,cy:100,n:'SEBASTIÁN'},L:{dx:60,dy:90,w:150,cx:135,cy:90,n:'LOLA'},E:{dx:320,dy:340,w:170,cx:405,cy:340,n:'EDU'}};
+const P={R:{dx:60,dy:290,w:150,cx:135,cy:290,n:'RENATO'},S:{dx:560,dy:100,w:170,cx:645,cy:100,n:'SEBASTIÁN'},L:{dx:60,dy:90,w:150,cx:135,cy:90,n:'LOLA'},E:{dx:320,dy:340,w:170,cx:405,cy:340,n:'EDU'},M:{dx:330,dy:110,w:150,cx:405,cy:110,n:'MARTA'}};
 for(const k in P){const q=P[k];el('rect',{x:q.dx,y:q.dy+10,width:q.w,height:46,rx:S.rr,fill:S.desk},svg);el('rect',{x:q.dx,y:q.dy,width:q.w,height:18,rx:S.rr,fill:S.deskTop},svg);
  el('rect',{x:q.dx+q.w/2-22,y:q.dy-30,width:44,height:30,rx:4,fill:S.mon,stroke:S.edge,'stroke-width':2},svg);el('rect',{x:q.dx+q.w/2-17,y:q.dy-25,width:34,height:20,fill:S.scr,opacity:.9},svg);
  el('text',{x:q.dx+q.w/2,y:q.dy+48,'text-anchor':'middle','font-family':S.font,'font-size':S.fs,fill:'#fff'},svg).textContent=q.n}
@@ -48,10 +48,11 @@ function char(k){const root=el('g',{},svg),mv=el('g',{},root),bob=el('g',{},mv),
  el('rect',{x:-13,y:-88,width:26,height:28,rx:13,fill:S.skin,stroke:S.edge,'stroke-width':2},bob);el('rect',{x:-14,y:-91,width:28,height:11,rx:6,fill:h},bob);
  if(k==='L'){el('rect',{x:-18,y:-80,width:6,height:14,rx:3,fill:S.accent,stroke:S.edge,'stroke-width':2},bob);el('rect',{x:12,y:-80,width:6,height:14,rx:3,fill:S.accent,stroke:S.edge,'stroke-width':2},bob)}
  if(k==='E'){el('rect',{x:-15,y:-95,width:30,height:8,rx:4,fill:S.accent},bob)}
+ if(k==='M'){el('rect',{x:-8,y:-102,width:16,height:12,rx:6,fill:h},bob);el('rect',{x:-14,y:-80,width:5,height:16,rx:3,fill:h},bob);el('rect',{x:9,y:-80,width:5,height:16,rx:3,fill:h},bob)}
  if(k==='S'){el('rect',{x:-10,y:-74,width:8,height:6,fill:'none',stroke:S.edge,'stroke-width':2},bob);el('rect',{x:2,y:-74,width:8,height:6,fill:'none',stroke:S.edge,'stroke-width':2},bob)}else{el('rect',{x:-7,y:-73,width:3,height:3,fill:S.edge},bob);el('rect',{x:4,y:-73,width:3,height:3,fill:S.edge},bob)}
  const paper=el('g',{opacity:0},bob);el('rect',{x:16,y:-52,width:18,height:22,fill:S.paper,stroke:S.edge,'stroke-width':2},paper);el('rect',{x:19,y:-45,width:12,height:3,fill:S.edge},paper);
  const o={mv,bob,paper};place(o,P[k].cx,P[k].cy);return o}
-const C={};['L','S','R','E'].forEach(k=>C[k]=char(k));
+const C={};['L','S','M','R','E'].forEach(k=>C[k]=char(k));
 const bubbles=el('g',{},svg);
 function say(o,text,color){bubbles.textContent='';const g=el('g',{},bubbles),t=el('text',{'font-family':S.font,'font-size':14,fill:color||S.bubT,'text-anchor':'middle'},g);t.textContent=text;
  const w=Math.min(t.getComputedTextLength()+22,380),bx=Math.max(8,Math.min(792-w,o.x-w/2)),by=Math.max(60,o.y-128);
@@ -67,14 +68,15 @@ function fase(){ // render de >6 min = ya llegó el aviso a Telegram
 function pinta(){board.textContent=`Hoy: ${st.listos||0} listos · ${st.rechazos||0} rechazos`;trayN.textContent=String(st.pendientes||0);
  const ago=Math.max(0,Math.round((Date.now()-Date.parse(st.actualizado||Date.now()))/60000));
  document.getElementById('resumen').textContent=`${st.pendientes||0} vídeo(s) esperando tu aprobación · ${st.aprobados||0} aprobados en total`;
- document.getElementById('estado').textContent=`Actualizado hace ${ago} min · fase: ${fase()}${st.detalle?' · '+st.detalle:''}`}
+ document.getElementById('estado').textContent=`Actualizado hace ${ago} min · fase: ${fase()}${st.detalle?' · '+st.detalle:''}`+(st.redes?' · redes: '+Object.entries(st.redes).map(([k,v])=>k+' '+v).join(', '):'')}
 async function cargar(){try{const r=await fetch('status.json?t='+Date.now(),{cache:'no-store'});st=await r.json();pinta()}catch(e){}}
 async function ciclo(){const f=fase(),R=C.R,Sb=C.S,L=C.L,E=C.E;
  if(f==='redacta'){await allHome('R');typing(R,true);say(R,'Escribiendo la variante…');await sleep(3500);typing(R,false);R.paper.setAttribute('opacity',1);await walk(R,575,170,1800);say(Sb,'Revisando cuentas…');await sleep(2500);hush();R.paper.setAttribute('opacity',0);await walk(R,135,290,1800)}
  else if(f==='voz'){await allHome('L');typing(L,true);say(L,'Grabando la voz…');await sleep(4000)}
  else if(f==='render'){await allHome('E');typing(E,true);say(E,'Renderizando en GitHub (~3 min)');await sleep(4000)}
  else if(f==='aprobar'){await allHome('E');if(E.x!==640){E.paper.setAttribute('opacity',1);await walk(E,640,400,1500);E.paper.setAttribute('opacity',0)}say(E,'Listo: revísalo en Telegram',S.okc);await sleep(4000)}
+ else if(f==='redes'){await allHome('M');typing(C.M,true);say(C.M,'Revisando comentarios y métricas…');await sleep(4000)}
  else if(f==='fallo'){await allHome('S');say(Sb,'Hoy no salió variante verificada',S.noc);await sleep(4000)}
- else{await allHome();hush();say(R,'Esperando el próximo turno (08:00)');await sleep(4000)}}
+ else{await allHome();hush();say(R,'Esperando el próximo turno (08:00)');await sleep(3500);const rd=st.redes||{},con=Object.values(rd).filter(v=>v==='ok').length;say(C.M,con?`Vigilando ${con} red(es)`:'Sin redes conectadas aún',con?S.okc:S.noc);await sleep(3500)}}
 (async()=>{await cargar();setInterval(cargar,30000);setInterval(pinta,60000);while(true){await ciclo()}})();
 </script></body></html>
