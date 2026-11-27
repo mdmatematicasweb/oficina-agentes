@@ -127,17 +127,22 @@ Object.assign(ST.I,{skin:'#f6d3b3',style:'bun'});for(const k of['L','M','V','I']
 const EXTRA=[
  {t:'cab',x:6,y:15},{t:'cab',x:7,y:15},{t:'cpu',x:6,y:17},
  {t:'wb',x:22,y:15,w:3},{t:'plant',x:11,y:0},{t:'cab',x:14,y:0},{t:'plant',x:15,y:18},{t:'plant',x:8,y:5},
- {t:'cooler',x:15,y:9},{t:'sofa',x:18,y:11,w:3},{t:'shelf',x:23,y:11,w:2},{t:'lamp',x:25,y:7},{t:'plant',x:25,y:11},{t:'vchair',x:20,y:10},{t:'vchair',x:21,y:10},{t:'cab',x:24,y:5},{t:'cab',x:8,y:12}];
+ {t:'cooler',x:15,y:9},{t:'cafe',x:15,y:12},{t:'sofa',x:18,y:11,w:3},{t:'shelf',x:23,y:11,w:2},{t:'lamp',x:25,y:7},{t:'plant',x:25,y:11},{t:'vchair',x:20,y:10},{t:'vchair',x:21,y:10},{t:'cab',x:24,y:5},{t:'cab',x:8,y:12}];
 const TRAY=[22,8];
 const blk=Array.from({length:H},()=>Array(W).fill(true));
-const isFloor=(x,y)=>(x>=0&&x<=8||x>=10&&x<=15||x>=17&&x<=25)&&y>=0&&y<H&&!(y===6||y===13);
+const isFloor=(x,y)=>y>=0&&y<H&&(x>=10&&x<=15||(x>=0&&x<=8||x>=17&&x<=25)&&!(y===6||y===13));
 for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(isFloor(x,y))blk[y][x]=false;
 DOORS.forEach(([x,y])=>blk[y][x]=false);
 const block=(x,y,w,d)=>{for(let j=0;j<d;j++)for(let i=0;i<w;i++)blk[Math.floor(y+j)][Math.floor(x+i)]=true};
 for(const k in ST)block(...ST[k].desk);EXTRA.forEach(e=>block(e.x,e.y,e.w||1,1));
-function bfs(a,b){const key=(x,y)=>y*W+x,prev=new Map([[key(...a),null]]),q=[a];
+const PANELES=[[4,0],[4,7],[21,0]];PANELES.forEach(([x,y0])=>block(x,y0,1,4));
+const SEATS=new Set(Object.values(ST).map(s=>s.seat[1]*W+s.seat[0]));
+const CAFE=[[14,12],[15,11]],AGUA=[[14,9],[15,8],[15,10]];
+function bfs(a,b,occ){const key=(x,y)=>y*W+x,prev=new Map([[key(...a),null]]),q=[a];
  while(q.length){const c=q.shift();if(c[0]===b[0]&&c[1]===b[1])break;
-  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=c[0]+dx,ny=c[1]+dy;if(nx<0||ny<0||nx>=W||ny>=H||blk[ny][nx]||prev.has(key(nx,ny)))continue;prev.set(key(nx,ny),c);q.push([nx,ny])}}
+  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=c[0]+dx,ny=c[1]+dy;if(nx<0||ny<0||nx>=W||ny>=H||blk[ny][nx]||prev.has(key(nx,ny)))continue;
+   const esB=nx===b[0]&&ny===b[1];if(!esB&&(SEATS.has(key(nx,ny))||(occ&&occ.has(key(nx,ny)))))continue;if(esB&&occ&&occ.has(key(nx,ny)))continue;
+   prev.set(key(nx,ny),c);q.push([nx,ny])}}
  if(!prev.has(key(...b)))return[];const path=[];let c=b;while(c){path.unshift(c);c=prev.get(key(...c))}return path.slice(1)}
 // ---------- Agentes ----------
 const AG={};for(const k in ST){const s=ST[k];AG[k]={k,...s,x:s.seat[0],y:s.seat[1],path:[],res:null,typing:false,paper:false,bub:null,bcol:null,st:['Libre','libre'],t:0,face:0}}
@@ -185,7 +190,7 @@ function dibujaAgente(a){cx.save();
   ST_(pts,OL,9.5);ST_(pts,sh(coat,.88),6.8);E(hx,hy,3.4,3.4,SK)};
  if(sit||a.typing){arm(-1,-9,-32+tj,-17,-33);arm(1,9,-32-tj,17,-33)}
  else{arm(-1,-14.5,-26+sw,-13.8,-33);arm(1,14.5,-26-sw,13.8,-33)}
- if(a.paper){RR(11,-45,12,16,1.5,'#ffffff');ST_([[13.5,-41],[20,-41]],'#9aa6bd',1.2);ST_([[13.5,-38],[20,-38]],'#9aa6bd',1.2);ST_([[13.5,-35],[18,-35]],'#9aa6bd',1.2)}
+ if(a.paper){const rj=a.paper==='rojo';RR(11,-45,12,16,1.5,rj?'#ffe3df':'#ffffff');ST_([[13.5,-41],[20,-41]],rj?'#d8514a':'#9aa6bd',1.2);ST_([[13.5,-38],[20,-38]],rj?'#d8514a':'#9aa6bd',1.2);ST_([[13.5,-35],[18,-35]],rj?'#d8514a':'#9aa6bd',1.2)}
  // ---- cabeza ----
  if(!(front&&a.style==='long')){E(-9.8,-56,2.3,3.2,SK);E(9.8,-56,2.3,3.2,SK)}
  const LONG=a.style==='long'||(fem&&a.style==='long');
@@ -260,6 +265,10 @@ function drawExtra(e){const{t,x,y}=e;
   for(const h of[1.4,4.2,7]){quadY(x+.12,x+.88,y+.94,h,h+2.4,'#9aa7ba','#566174');line3(x+.4,y+.94,h+1.2,'#2f3846',[x+.6,y+.94])}}
  else if(t==='cpu'){box(x+.2,y+.15,.6,.7,9,0,'#97a1b3','#6f7a8f','#566074');quadY(x+.26,x+.74,y+.85,6,7.2,'#1d2433',null);line3(x+.3,y+.85,3,'#4be39a',[x+.45,y+.85])}
  else if(t==='cooler'){box(x+.25,y+.25,.5,.5,7,0,'#dfe6ee','#b4bfcd','#8f9bab');box(x+.3,y+.3,.4,.4,6,7,'#7fd3f0','#5fb7d6','#4698b8');quadY(x+.36,x+.64,y+.75,4,5,'#3b4a63',null)}
+ else if(t==='cafe'){box(x+.05,y+.1,.9,.8,7,0,'#8a5a3a','#6a4026','#4a2a16');box(x+.05,y+.1,.9,.8,.6,7,'#d9c9a8','#bfae8a','#9d8e6e');
+  box(x+.2,y+.22,.6,.5,9,7.6,'#c23a3a','#9c2a2a','#7a1e1e');quadY(x+.28,x+.72,y+.72,12,15.5,'#1d2433','#0d1019');box(x+.4,y+.3,.2,.2,2.4,7.6,'#ffffff','#d9dde8','#b4bacb');
+  quadY(x+.3,x+.45,y+.72,9,10.4,'#4be39a',null);quadY(x+.55,x+.7,y+.72,9,10.4,'#ffe66d',null);
+  for(let i=0;i<3;i++){const ph=((TT*.7+i/3)%1),[px,py]=P(x+.5,y+.5,19+ph*10);cx.fillStyle='rgba(255,255,255,'+(.55*(1-ph))+')';cx.beginPath();cx.arc(px+Math.sin(ph*6+i)*2.5,py,2.2+ph*2.2,0,7);cx.fill()}}
  else if(t==='plant'){box(x+.28,y+.28,.44,.44,4,0,'#d37a44','#a35a2b','#7a3f1b');
   const[px,py]=P(x+.5,y+.5,4);cx.save();cx.translate(px,py);cx.scale(2,2);
   const L=[['#2f8a49',-6,-6,5,6],['#3fae5c',-3,-12,6,8],['#2f8a49',1,-7,6,6],['#63d27f',-1,-14,3,4],['#3fae5c',-5,-9,3,3],['#63d27f',3,-9,3,3]];
@@ -278,7 +287,8 @@ function drawExtra(e){const{t,x,y}=e;
   const notes=[['#ffe66d',.3,9],['#ff9a8a',.9,6],['#7ee0c3',1.5,9],['#ffe66d',2.1,6],['#ff9a8a',2.5,9]];
   notes.forEach(([c,o,hh])=>{quadY(x+o,x+o+.22,y+.56,hh,hh+2,c,OL)})}}
 // ---------- Escena ----------
-function dibuja(t){cx.fillStyle='#0a0e1a';cx.fillRect(0,0,CW,CH);
+let TT=0;
+function dibuja(t){TT=t;cx.fillStyle='#0a0e1a';cx.fillRect(0,0,CW,CH);
  const fl=(R)=>{for(let y=R.y0;y<=R.y1;y++)for(let x=R.x0;x<=R.x1;x++)tile(x,y,(x+y)%2?R.c:sh(R.c,.93))};
  ROOMS.forEach(fl);fl(HALL);
  for(let y=0;y<H;y++){for(const x of[9,16])tile(x,y,'#bdb7a9')}
@@ -337,18 +347,39 @@ function overlay(){for(const k in AG){const a=AG[k],e=els[k],[sx,sy]=iso(a.x+.5,
   const b=e.querySelector('.bub');if(a.bub){b.style.display='block';b.textContent=a.bub;b.style.color=a.bcol||'#10151f'}else b.style.display='none'}}
 // ---------- Movimiento ----------
 let last=performance.now();
+const choca=(a,x,y)=>{for(const k in AG){const b=AG[k];if(b===a)continue;if(Math.hypot(b.x-x,b.y-y)<.85)return b;if(b.go&&b.path[0]&&b.path[0][0]===x&&b.path[0][1]===y)return b}return null};
+const libreT=(a,x,y)=>x>=0&&y>=0&&x<W&&y<H&&!blk[y][x]&&!SEATS.has(y*W+x)&&!choca(a,x,y);
+function replan(a){const occ=new Set();for(const k in AG){const b=AG[k];if(b===a)continue;occ.add(Math.round(b.y)*W+Math.round(b.x));if(b.go&&b.path[0])occ.add(b.path[0][1]*W+b.path[0][0])}
+ a.path=a.goal?bfs([Math.round(a.x),Math.round(a.y)],a.goal,occ):[];return a.path.length>0}
+function lado(a){const x=Math.round(a.x),y=Math.round(a.y);for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])if(libreT(a,x+dx,y+dy)){a.path=[[x+dx,y+dy]];return true}return false}
+function llega(a){a.goal=null;a.espera=0;a.fallos=0;const r=a.res;a.res=null;if(r)r()}
 function frame(now){const dt=Math.min(.1,(now-last)/1000);last=now;
- for(const k in AG){const a=AG[k];a.t+=dt;if(a.path.length){const[tx,ty]=a.path[0],dx=tx-a.x,dy=ty-a.y,d=Math.hypot(dx,dy),step=3.2*SPEED*dt;
-   if(Math.abs(dx)+Math.abs(dy)>.01)a.face=(dx+dy)>0?1:-1;if(d<=step){a.x=tx;a.y=ty;a.path.shift();if(!a.path.length&&a.res){const r=a.res;a.res=null;r()}}else{a.x+=dx/d*step;a.y+=dy/d*step}}}
+ for(const k in AG){const a=AG[k];a.t+=dt;
+  const cen=Math.abs(a.x-Math.round(a.x))<.001&&Math.abs(a.y-Math.round(a.y))<.001;
+  if(!a.path.length){a.go=false;
+   if(a.goal){if(cen&&Math.round(a.x)===a.goal[0]&&Math.round(a.y)===a.goal[1])llega(a);
+    else if(cen){a.espera=(a.espera||0)+dt;if(a.espera>.5){a.espera=0;a.fallos=(a.fallos||0)+1;if(!replan(a)&&!lado(a)&&a.fallos>14)llega(a)}}}
+   continue}
+  const[tx,ty]=a.path[0];
+  if(cen){if(choca(a,tx,ty)){a.go=false;a.espera=(a.espera||0)+dt;
+    if(a.espera>.6){a.espera=0;a.fallos=(a.fallos||0)+1;if(!replan(a)&&a.fallos>3)lado(a)}continue}
+   a.go=true;a.espera=0}
+  const dx=tx-a.x,dy=ty-a.y,d=Math.hypot(dx,dy),step=3.2*SPEED*dt;
+  if(Math.abs(dx)+Math.abs(dy)>.01)a.face=(dx+dy)>0?1:-1;
+  if(d<=step){a.x=tx;a.y=ty;a.path.shift();if(!a.path.length)a.go=false}else{a.x+=dx/d*step;a.y+=dy/d*step}}
  dibuja(now/1000);overlay();requestAnimationFrame(frame)}
 requestAnimationFrame(frame);
 const chk=my=>{if(runId!==my)throw'cancel'};
 const wait=async(ms,my)=>{await sleep(ms/SPEED);chk(my)};
-function goto(a,x,y,my){return new Promise(res=>{a.path=bfs([Math.round(a.x),Math.round(a.y)],[x,y]);if(!a.path.length){res();return}a.res=()=>{res()}}).then(()=>chk(my))}
+function goto(a,x,y,my){return new Promise(res=>{let g=[x,y];
+ if(choca(a,x,y)){const alt=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[x+dx,y+dy]).find(([u,v])=>libreT(a,u,v));if(alt)g=alt}
+ a.goal=g;a.espera=0;a.fallos=0;a.res=res;a.path=[];
+ if(Math.round(a.x)===g[0]&&Math.round(a.y)===g[1]&&Math.abs(a.x-g[0])<.001&&Math.abs(a.y-g[1])<.001){llega(a);return}
+ replan(a)}).then(()=>chk(my))}
 const home=(k,my)=>goto(AG[k],...AG[k].seat,my);
 const say=(a,t,c)=>{a.bub=t;a.bcol=c||null};const hush=()=>{for(const k in AG)AG[k].bub=null};
 async function trabajar(k,txt,ms,my,col){const a=AG[k];await home(k,my);a.typing=true;say(a,txt,col);await wait(ms,my);a.typing=false;a.bub=null}
-async function entregar(de,a,txt,ms,my,col){const A=AG[de],B=AG[a];A.paper=true;const[bx,by]=B.seat;
+async function entregar(de,a,txt,ms,my,col){const A=AG[de],B=AG[a];A.paper=col==='#d8514a'?'rojo':true;const[bx,by]=B.seat;
  const dest=a==='D'?[TRAY[0]+1,TRAY[1]+1]:(!blk[by][bx-1]?[bx-1,by]:[bx+1,by]);
  await goto(A,dest[0],dest[1],my);say(B,txt,col);await wait(ms,my);B.bub=null;A.paper=false;await home(de,my)}
 // ---------- Estado vivo ----------
@@ -380,16 +411,21 @@ function paneles(){const e=estados();let act=0;
 async function cargar(){try{const r=await fetch('status.json?t='+Date.now(),{cache:'no-store'});st=await r.json();eventosVivo=st.eventos||[];paneles()}catch(e){}}
 async function ciclo(my){const f=fase();
  if(f==='redacta'){await trabajar('R','Redactando la variante…',3000,my);await entregar('R','S','Revisando cuentas…',2500,my)}
- else if(f==='voz')await trabajar('L','Grabando la voz…',4000,my);
- else if(f==='render')await trabajar('E','Renderizando en GitHub (~3 min)',4000,my);
+ else if(f==='voz'){await entregar('S','L','Variante verificada: a grabar',2200,my);await trabajar('L','Grabando la voz…',4000,my)}
+ else if(f==='render'){await entregar('L','E','Voz lista: a renderizar',2200,my);await trabajar('E','Renderizando en GitHub (~3 min)',4000,my)}
  else if(f==='aprobar')await entregar('E','D','Listo: revísalo en Telegram',3500,my,'#1f9d78');
  else if(f==='redes')await trabajar('M','Revisando comentarios y métricas…',4000,my);
  else if(f==='correo')await trabajar('P','Leyendo el correo de la web…',4000,my);
  else if(f==='tips')await trabajar('I','Preparando una ficha de tips…',4000,my);
- else if(f==='fallo'){say(AG.S,'Hoy no salió variante verificada','#d8514a');await wait(3500,my);AG.S.bub=null}
- else{ // reposo: alguien da una vuelta por el pasillo
-  const libres=['R','S','L','E','M','P','I'].filter(k=>true),k=libres[Math.floor(Math.random()*libres.length)],a=AG[k];
-  await goto(a,12+Math.floor(Math.random()*2),6+Math.floor(Math.random()*8),my);say(a,['Un café ☕','Todo tranquilo','Esperando el turno de las 08:00'][Math.floor(Math.random()*3)]);await wait(2500,my);a.bub=null;await home(k,my)}}
+ else if(f==='fallo'){await entregar('S','R','Hoy no salió variante verificada',3000,my,'#d8514a')}
+ else await descanso(my)}
+// reposo: alguien se levanta a por un café, agua o estira las piernas
+async function descanso(my){const k=['R','S','L','E','M','P','I','V'][Math.floor(Math.random()*8)],a=AG[k],r=Math.random();
+ const sitio=(L,t,msg,ms)=>(async()=>{let g=L.find(([x,y])=>!choca(a,x,y))||L[0];await goto(a,g[0],g[1],my);say(a,msg);await wait(ms,my);a.bub=null});
+ if(r<.55)await sitio(CAFE,'cafe','☕ Un café',3000)();
+ else if(r<.8)await sitio(AGUA,'agua','💧 Un vaso de agua',2500)();
+ else await sitio([[12,4+Math.floor(Math.random()*10)],[13,4+Math.floor(Math.random()*10)]],'pasillo',['Todo tranquilo','Esperando el turno de las 08:00'][Math.floor(Math.random()*2)],2500)();
+ await home(k,my);await wait(1500,my)}
 async function vivo(){const my=++runId;modo='vivo';SPEED=1;hush();document.getElementById('bVivo').hidden=true;document.getElementById('bPlay').disabled=false;
  try{while(runId===my)await ciclo(my)}catch(e){if(e!=='cancel')console.error(e)}}
 // ---------- Reproducción del día ----------
@@ -400,7 +436,7 @@ async function reproducir(){const dia=document.getElementById('sDia').value;let 
  if(!ev.length){document.getElementById('pgT').textContent='Sin eventos ese día';return}
  const my=++runId;modo='replay';SPEED=+document.getElementById('sVel').value;hush();replayShown=[];paneles();
  document.getElementById('bVivo').hidden=false;document.getElementById('bPlay').disabled=true;
- for(const k in AG){AG[k].path=[];AG[k].res=null;AG[k].typing=false;AG[k].paper=false;AG[k].x=ST[k].seat[0];AG[k].y=ST[k].seat[1];AG[k].st=['Libre','libre']}
+ for(const k in AG){AG[k].path=[];AG[k].goal=null;AG[k].go=false;AG[k].res=null;AG[k].typing=false;AG[k].paper=false;AG[k].x=ST[k].seat[0];AG[k].y=ST[k].seat[1];AG[k].st=['Libre','libre']}
  let prev=null;
  try{for(let i=0;i<ev.length;i++){const e=ev[i],k=KEY[e.quien];SPEED=+document.getElementById('sVel').value;
    document.getElementById('pg').style.width=(i/ev.length*100)+'%';document.getElementById('pgT').textContent=`${e.t} · ${i+1}/${ev.length}`;
@@ -408,9 +444,12 @@ async function reproducir(){const dia=document.getElementById('sDia').value;let 
    if(!k){await wait(1500,my);continue}
    const rojo=/rechazo|ninguna|error|aviso/i.test(e.texto)?'#d8514a':null;
    for(const kk in AG)AG[kk].st=['Libre','libre'];AG[k].st=['Trabajando',rojo?'alerta':'trab'];
-   if(prev&&prev!==k&&k!=='D')await entregar(prev,k,e.texto,2200,my,rojo);
-   else if(k==='D'&&prev&&prev!=='D')await entregar(prev,'D',e.texto,2200,my,'#1f9d78');
+   const sig=ev[i+1]?KEY[ev[i+1].quien]:null,aviso=k==='V'&&/aviso/i.test(e.texto);
+   const arista=prev&&prev!==k&&((prev==='R'&&k==='S')||(prev==='S'&&k==='L')||(prev==='L'&&k==='E')||(prev==='E'&&k==='D')||(prev==='I'&&k==='D'));
+   if(arista)await entregar(prev,k,e.texto,2200,my,k==='D'?'#1f9d78':rojo);
+   else if(aviso)await entregar('V','D',e.texto,2200,my,'#d8514a');
    else await trabajar(k,e.texto,2200,my,rojo);
+   if(k==='S'&&rojo&&sig==='R')await entregar('S','R','Devuelto a corregir',2200,my,'#d8514a');
    prev=k}
   document.getElementById('pg').style.width='100%';document.getElementById('pgT').textContent='Fin del día';await sleep(1500);}
  catch(e){if(e!=='cancel')console.error(e);return}
