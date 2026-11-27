@@ -152,7 +152,7 @@ function dibujaAgente(a){cx.save();
  const sit=!mov&&Math.abs(a.x-a.seat[0])<.05&&Math.abs(a.y-a.seat[1])<.05;
  const front=mov&&a.face>0,fem=!!a.fem,SK=a.skin||SKIN,SKd=sh(SK,.78),hc=a.hair,hcl=sh(hc,1.5),coat=a.coat,cd=sh(coat,.7);
  const bob=mov?(ph?-1.5:0):0;
- cx.translate(Math.round(sx0),Math.round(sy0+6)+(sit?15:0));cx.scale(1.3,1.3);cx.lineJoin='round';cx.lineCap='round';
+ cx.translate(Math.round(sx0),Math.round(sy0+6)+(sit?19:0));cx.scale(1.3,1.3);cx.lineJoin='round';cx.lineCap='round';
  const draw=(fn,fill,ol,lw)=>{cx.beginPath();fn();if(fill){cx.fillStyle=fill;cx.fill()}if(ol!==false){cx.strokeStyle=OL;cx.lineWidth=lw||2;cx.stroke()}};
  const E=(x,y,rx,ry,fill,ol)=>draw(()=>cx.ellipse(x,y+bob,rx,ry,0,0,7),fill,ol);
  const RR=(x,y,w,h,r,fill,ol)=>draw(()=>cx.roundRect(x,y+bob,w,h,r),fill,ol);
@@ -239,22 +239,22 @@ function rotulo(txt,plano,pos,centro,h0,oro){cx.save();cx.font='17px VT323, mono
  cx.fillStyle=oro?'#f3d68a':'#e8f2ff';cx.fillText(txt,0,0);cx.restore()}
 // ---------- Muebles ----------
 function monitor(mx,my,mw,seed,t){
- box(mx+mw/2-.18,my+.05,.36,.15,1.5,5,'#2b3550','#1f273a','#181f30');
- box(mx,my,mw,.22,8.5,6,'#252d42','#161d2d','#10151f');screen(mx,my,mw,.22,8.5,6,seed,t)}
+ box(mx+mw/2-.18,my+.05,.36,.15,1.5,10,'#2b3550','#1f273a','#181f30');
+ box(mx,my,mw,.22,8.5,11,'#252d42','#161d2d','#10151f');screen(mx,my,mw,.22,8.5,11,seed,t)}
 function mesa(k,t){const s=ST[k],[x,y,w,d]=s.desk;
- const D=k==='D',cs=D?['#7a4426','#5a2e19','#40200f']:['#e69a55','#bd6c31','#8d4f22'];box(x,y,w,d,5,0,...cs);if(D)line3(x,y+d,4.6,'#e0b84f',[x+w,y+d]);
+ const D=k==='D',cs=D?['#7a4426','#5a2e19','#40200f']:['#e69a55','#bd6c31','#8d4f22'];box(x,y,w,d,10,0,...cs);if(D)line3(x,y+d,9.6,'#e0b84f',[x+w,y+d]);
  if(k==='D'){
   // despacho: mesa grande con portátil, lámpara, plumier y bandeja
-  quadY(x+.15,x+1.3,y+d,.8,4.2,'#6a3820','#e0b84f');quadY(x+1.5,x+2.7,y+d,.8,4.2,'#6a3820','#e0b84f');
-  box(x+.4,y+.5,1.3,1.0,.8,5,'#cfd5e2','#a3abbf','#838ba0');box(x+.5,y+.55,1.1,.14,5.5,5.8,'#2a3248','#1c2336','#141a29');
-  box(x+2.2,y+.3,.9,.9,.5,5,'#f4f1e6','#d7d1bd','#b9b29a');box(x+3.1,y+1.2,.3,.3,3,5,'#ffd24a','#d9a92a','#a8801c')}
+  quadY(x+.15,x+1.3,y+d,.8,9.2,'#6a3820','#e0b84f');quadY(x+1.5,x+2.7,y+d,.8,9.2,'#6a3820','#e0b84f');
+  box(x+.4,y+.5,1.3,1.0,.8,10,'#cfd5e2','#a3abbf','#838ba0');box(x+.5,y+.55,1.1,.14,5.5,10.8,'#2a3248','#1c2336','#141a29');
+  box(x+2.2,y+.3,.9,.9,.5,10,'#f4f1e6','#d7d1bd','#b9b29a');box(x+3.1,y+1.2,.3,.3,3,10,'#ffd24a','#d9a92a','#a8801c')}
  else{
   // pedestal con cajones al final de la mesa
-  quadY(x+w-.95,x+w-.08,y+d,.7,4.6,'#c4702f','#7e441b');
-  for(const h of[1.9,3.2])quadY(x+w-.85,x+w-.18,y+d,h,h+.9,'#d28340',null),line3(x+w-.66,y+d,h+.45,'#5a3515',[x+w-.36,y+d]);
+  quadY(x+w-.95,x+w-.08,y+d,.7,9.6,'#c4702f','#7e441b');
+  for(const h of[2.8,6.2])quadY(x+w-.85,x+w-.18,y+d,h,h+2.2,'#d28340',null),line3(x+w-.66,y+d,h+1.1,'#5a3515',[x+w-.36,y+d]);
   monitor(x+.1,y+.18,.95,k.charCodeAt(0),AG[k].typing?t:0);monitor(x+1.02,y+.14,.95,k.charCodeAt(0)+1,AG[k].typing?t:0);monitor(x+1.94,y+.18,.95,k.charCodeAt(0)+2,AG[k].typing?t:0);
-  box(x+.9,y+.62,1.2,.32,.8,5,'#e2e6ef','#aab1c4','#8890a6');line3(x+.98,y+.94,5.9,'#8f98ad',[x+2.0,y+.94]);
-  box(x+2.35,y+.62,.3,.3,1.8,5,'#ffffff','#d9dde8','#b4bacb');box(x+.2,y+.65,.5,.35,.6,5,'#fbfbf4','#d9d6c6','#bab69f')}}
+  box(x+.9,y+.62,1.2,.32,.8,10,'#e2e6ef','#aab1c4','#8890a6');line3(x+.98,y+.94,10.9,'#8f98ad',[x+2.0,y+.94]);
+  box(x+2.35,y+.62,.3,.3,1.8,10,'#ffffff','#d9dde8','#b4bacb');box(x+.2,y+.65,.5,.35,.6,10,'#fbfbf4','#d9d6c6','#bab69f')}}
 function silla(k){const[sx,sy]=ST[k].seat;const D=k==='D';
  box(sx+.42,sy+.42,.16,.16,2.5,0,'#2a2f3d','#1c202b','#14171f');
  box(sx+.1,sy+.45,.8,.1,.7,0,'#2a2f3d','#1c202b','#14171f');box(sx+.45,sy+.1,.1,.8,.7,0,'#2a2f3d','#1c202b','#14171f');
@@ -322,18 +322,18 @@ function dibuja(t){TT=t;cx.fillStyle='#0a0e1a';cx.fillRect(0,0,CW,CH);
  for(let y=0;y<H;y++){if(!DOORS.some(d=>d[0]===9&&d[1]===y))glassV(9,y);if(!DOORS.some(d=>d[0]===16&&d[1]===y))glassV(16,y)}
  for(const yy of[6,13]){for(let x=0;x<=8;x++)glassH(x,yy);for(let x=17;x<=25;x++)glassH(x,yy)}
  // cubículos: panel bajo entre puestos vecinos
- for(const[x,y0]of[[4,0],[4,7],[21,0]])for(let y=y0;y<y0+4;y++)items.push({k:x+y+.9,d:()=>{box(x+.4,y,.14,1,13,0,'#8fb7b9','#6c9598','#557a7d')}});
+ for(const[x,y0]of[[4,0],[4,7],[21,0]])for(let y=y0;y<y0+4;y++)items.push({k:x+y+.9,d:()=>{box(x+.4,y,.14,1,17,0,'#8fb7b9','#6c9598','#557a7d')}});
  for(const k in ST){const[x,y,w,d]=ST[k].desk,[sx,sy]=ST[k].seat;
   items.push({k:kb(x,y,w,d),d:()=>mesa(k,AG[k].t)});
   items.push({k:sx+sy+.55,d:()=>silla(k)});items.push({k:sx+sy+1.45,d:()=>respaldo(k)})}
  EXTRA.forEach(e=>items.push({k:kb(e.x,e.y,e.w||1,1),d:()=>drawExtra(e)}));
- items.push({k:TRAY[0]+1+TRAY[1]+1-.1,d:()=>box(TRAY[0],TRAY[1]+.1,1,.8,3,5,'#FFE66D','#d9bd4a','#b89c2a')});
+ items.push({k:TRAY[0]+1+TRAY[1]+1-.1,d:()=>box(TRAY[0],TRAY[1]+.1,1,.8,3,10,'#FFE66D','#d9bd4a','#b89c2a')});
  for(const k in AG){const a=AG[k];items.push({k:a.x+a.y+1.0,d:()=>dibujaAgente(a)})}
  items.sort((p,q)=>p.k-q.k);items.forEach(i=>i.d())}
 // ---------- Superposición HTML ----------
 const els={};
 for(const k in ST){const d=document.createElement('div');d.className='ag';d.innerHTML='<div class="bub" style="display:none"></div><div class="lab" style="display:none"><b></b><i></i></div><div class="dot"></div>';ov.appendChild(d);els[k]=d}
-const trayEl=document.createElement('div');trayEl.className='tray';{const[sx,sy]=iso(TRAY[0]+.5,TRAY[1]+.5);trayEl.style.left=(sx/CW*100)+'%';trayEl.style.top=((sy-30)/CH*100)+'%'}ov.appendChild(trayEl);
+const trayEl=document.createElement('div');trayEl.className='tray';{const[sx,sy]=iso(TRAY[0]+.5,TRAY[1]+.5);trayEl.style.left=(sx/CW*100)+'%';trayEl.style.top=((sy-40)/CH*100)+'%'}ov.appendChild(trayEl);
 let hov=null;const stage=document.querySelector('.stage');
 function pick(ev){const r=cv.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*CW,y=(ev.clientY-r.top)/r.height*CH;let best=null,bd=1e9;
  for(const k in AG){const a=AG[k],[sx,sy]=iso(a.x+.5,a.y+.5),fy=sy+6;if(x>sx-22&&x<sx+22&&y>fy-90&&y<fy+10){const d=Math.abs(x-sx)+Math.abs(y-(fy-40));if(d<bd){bd=d;best=k}}}return best}
