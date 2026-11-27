@@ -420,7 +420,10 @@ async function ciclo(my){const f=fase();
  else if(f==='fallo'){await entregar('S','R','Hoy no salió variante verificada',3000,my,'#d8514a')}
  else await descanso(my)}
 // reposo: alguien se levanta a por un café, agua o estira las piernas
-async function descanso(my){const k=['R','S','L','E','M','P','I','V'][Math.floor(Math.random()*8)],a=AG[k],r=Math.random();
+async function descanso(my){
+ if((st.pendientes||0)>0&&Math.random()<.4){await entregar('E','D','Vídeo listo: revísalo en Telegram',3000,my,'#1f9d78');return}
+ if(((st.profesor||{}).pendientes||0)>0&&Math.random()<.3){await entregar('I','D','Ficha lista: revísala en Telegram',3000,my,'#1f9d78');return}
+ const k=['R','S','L','E','M','P','I','V'][Math.floor(Math.random()*8)],a=AG[k],r=Math.random();
  const sitio=(L,t,msg,ms)=>(async()=>{let g=L.find(([x,y])=>!choca(a,x,y))||L[0];await goto(a,g[0],g[1],my);say(a,msg);await wait(ms,my);a.bub=null});
  if(r<.55)await sitio(CAFE,'cafe','☕ Un café',3000)();
  else if(r<.8)await sitio(AGUA,'agua','💧 Un vaso de agua',2500)();
@@ -445,11 +448,15 @@ async function reproducir(){const dia=document.getElementById('sDia').value;let 
    const rojo=/rechazo|ninguna|error|aviso/i.test(e.texto)?'#d8514a':null;
    for(const kk in AG)AG[kk].st=['Libre','libre'];AG[k].st=['Trabajando',rojo?'alerta':'trab'];
    const sig=ev[i+1]?KEY[ev[i+1].quien]:null,aviso=k==='V'&&/aviso/i.test(e.texto);
-   const arista=prev&&prev!==k&&((prev==='R'&&k==='S')||(prev==='S'&&k==='L')||(prev==='L'&&k==='E')||(prev==='E'&&k==='D')||(prev==='I'&&k==='D'));
-   if(arista)await entregar(prev,k,e.texto,2200,my,k==='D'?'#1f9d78':rojo);
+   const arista=prev&&prev!==k&&((prev==='R'&&k==='S')||(prev==='S'&&k==='L')||(prev==='L'&&k==='E'));
+   const aD=k==='D'?(/ficha|tips/i.test(e.texto)?'I':'E'):null;
+   if(aD)await entregar(aD,'D',e.texto,2200,my,'#1f9d78');
+   else if(arista)await entregar(prev,k,e.texto,2200,my,k==='D'?'#1f9d78':rojo);
    else if(aviso)await entregar('V','D',e.texto,2200,my,'#d8514a');
    else await trabajar(k,e.texto,2200,my,rojo);
    if(k==='S'&&rojo&&sig==='R')await entregar('S','R','Devuelto a corregir',2200,my,'#d8514a');
+   if(k==='E'&&sig!=='D')await entregar('E','D','Vídeo listo: a tu bandeja',2200,my,'#1f9d78');
+   if(k==='I'&&sig!=='D')await entregar('I','D','Ficha lista: a tu bandeja',2200,my,'#1f9d78');
    prev=k}
   document.getElementById('pg').style.width='100%';document.getElementById('pgT').textContent='Fin del día';await sleep(1500);}
  catch(e){if(e!=='cancel')console.error(e);return}
