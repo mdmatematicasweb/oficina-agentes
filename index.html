@@ -1,14 +1,26 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Oficina de agentes · MD Matemáticas</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Bricolage+Grotesque:wght@700;800&family=Inter:wght@400;600&display=swap">
+<title>MDmatemáticas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Lilita+One&family=Bricolage+Grotesque:wght@700;800&family=Inter:wght@400;600&display=swap">
 <style>
 :root{--bg:#0b0f19;--fg:#e8eef7;--muted:#93a0b8;--card:#121a2b;--line:#27324a;--mint:#4ECDC4;--sun:#FFE66D;--coral:#FF6B6B;--navy:#292F36;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Inter,system-ui,sans-serif;padding:24px 16px}
 main{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-.head{display:flex;align-items:center;gap:14px}
-.head svg{width:48px;height:48px;flex:none}
+.head{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.neon{position:relative;display:flex;align-items:center;gap:clamp(12px,3vw,28px);padding:18px clamp(18px,4vw,44px);border-radius:18px;background:#070a12;border:3px solid #141c30;box-shadow:inset 0 0 40px rgba(0,0,0,.8),0 0 0 1px #05070d}
+.neon:before,.neon:after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:#2a3350;top:8px;box-shadow:0 0 0 2px #0c1120}.neon:before{left:10px}.neon:after{right:10px}
+.neon svg{width:clamp(56px,10vw,96px);height:auto;flex:none;overflow:visible;filter:drop-shadow(0 0 3px currentColor) drop-shadow(0 0 10px #4ECDC4) drop-shadow(0 0 22px rgba(78,205,196,.55));animation:encender 1.2s steps(1) both,zum 7s 1.2s infinite}
+.neon svg path{filter:drop-shadow(0 0 4px currentColor)}
+.rot{display:flex;flex-direction:column;align-items:flex-start;line-height:.9}
+.rot b,.rot span{font:400 clamp(34px,8vw,84px)/.95 "Lilita One","Bricolage Grotesque",Inter,sans-serif;letter-spacing:.02em}
+.rot b{color:#ffd9d6;text-shadow:0 0 2px #fff,0 0 8px #FF6B6B,0 0 18px #FF6B6B,0 0 36px #ff3b3b,0 0 70px rgba(255,59,59,.8);animation:encender 1.2s .2s steps(1) both}
+.rot span{color:#fff;text-shadow:0 0 2px #fff,0 0 7px #fff,0 0 16px #8fd3ff,0 0 34px #4ECDC4,0 0 64px rgba(78,205,196,.7);animation:encender 1.2s .5s steps(1) both,zum 9s 2s infinite}
+.rot span{font-size:clamp(26px,6.2vw,64px)}
+@keyframes encender{0%{opacity:.08}8%{opacity:1}14%{opacity:.1}22%{opacity:.9}28%{opacity:.15}40%,100%{opacity:1}}
+@keyframes zum{0%,92%,100%{opacity:1}93%{opacity:.55}94%{opacity:1}96%{opacity:.7}97%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.neon svg,.rot b,.rot span{animation:none}}
+@media(max-width:520px){.neon{flex-direction:column;gap:8px}.rot{align-items:center}}
 h1{font:800 clamp(26px,4.6vw,38px)/1.05 "Bricolage Grotesque",Inter,sans-serif;margin:0}
 h1 span{color:var(--coral)}
 .sub{color:var(--muted);margin:4px 0 0}
@@ -53,8 +65,13 @@ h1 span{color:var(--coral)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}.legend b{color:var(--fg)}
 </style></head><body><main>
 <div class="head">
- <svg viewBox="0 0 123 123" role="img" aria-label="MD Matemáticas"><path d="M20 0H58V58H0V20A20 20 0 0 1 20 0Z" fill="#4ECDC4"/><path d="M65 0H103A20 20 0 0 1 123 20V58H65Z" fill="#292F36"/><path d="M0 65H58V123H20A20 20 0 0 1 0 103Z" fill="#FF6B6B"/><path d="M65 65H123V103A20 20 0 0 1 103 123H65Z" fill="#FFE66D"/><path d="M17.5 29H40.5M29 17.5V40.5" fill="none" stroke="#FFE66D" stroke-width="13" stroke-linecap="round"/><path d="M82.5 28.5H105.5" fill="none" stroke="#FF6B6B" stroke-width="12" stroke-linecap="round"/><path d="M21 86L37 102M37 86L21 102" fill="none" stroke="#292F36" stroke-width="13" stroke-linecap="round"/><path d="M82 81.5H106M82 105.5H106" fill="none" stroke="#4ECDC4" stroke-width="11" stroke-linecap="round"/></svg>
- <div><h1>Oficina de agentes</h1><p class="sub" id="resumen">Cargando estado…</p></div>
+ <div class="neon" role="img" aria-label="MD Matemáticas">
+  <i class="tube t1"></i><i class="tube t2"></i>
+  <svg viewBox="-6 -6 135 135" role="img" aria-label="MD Matemáticas"><path d="M20 0H58V58H0V20A20 20 0 0 1 20 0Z" fill="none" stroke="#4ECDC4" stroke-width="4"/><path d="M65 0H103A20 20 0 0 1 123 20V58H65Z" fill="#0b0f19" stroke="#8fd3ff" stroke-width="4"/><path d="M0 65H58V123H20A20 20 0 0 1 0 103Z" fill="none" stroke="#FF6B6B" stroke-width="4"/><path d="M65 65H123V103A20 20 0 0 1 103 123H65Z" fill="none" stroke="#FFE66D" stroke-width="4"/><path d="M17.5 29H40.5M29 17.5V40.5" fill="none" stroke="#FFE66D" stroke-width="13" stroke-linecap="round"/><path d="M82.5 28.5H105.5" fill="none" stroke="#FF6B6B" stroke-width="12" stroke-linecap="round"/><path d="M21 86L37 102M37 86L21 102" fill="none" stroke="#8fd3ff" stroke-width="9" stroke-linecap="round"/><path d="M82 81.5H106M82 105.5H106" fill="none" stroke="#4ECDC4" stroke-width="11" stroke-linecap="round"/></svg>
+  <div class="rot"><b>MD</b><span>matemáticas</span></div>
+ </div>
+ <p class="sub" id="resumen">Cargando estado…</p>
+</div>
 </div>
 <div class="stage"><canvas id="cv"></canvas><div id="ov"></div>
  <div class="win" id="winChat"><div class="tb"><span>CHAT DE LA OFICINA</span><u>_ ▫ ×</u></div><div class="bd"><div id="wChat"></div><div class="in"></div></div></div>
