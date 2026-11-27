@@ -152,7 +152,7 @@ function dibujaAgente(a){cx.save();
  const sit=!mov&&Math.abs(a.x-a.seat[0])<.05&&Math.abs(a.y-a.seat[1])<.05;
  const front=mov&&a.face>0,fem=!!a.fem,SK=a.skin||SKIN,SKd=sh(SK,.78),hc=a.hair,hcl=sh(hc,1.5),coat=a.coat,cd=sh(coat,.7);
  const bob=mov?(ph?-1.5:0):0;
- cx.translate(Math.round(sx0),Math.round(sy0+6)+(sit?12:0));cx.lineJoin='round';cx.lineCap='round';
+ cx.translate(Math.round(sx0),Math.round(sy0+6)+(sit?15:0));cx.scale(1.3,1.3);cx.lineJoin='round';cx.lineCap='round';
  const draw=(fn,fill,ol,lw)=>{cx.beginPath();fn();if(fill){cx.fillStyle=fill;cx.fill()}if(ol!==false){cx.strokeStyle=OL;cx.lineWidth=lw||2;cx.stroke()}};
  const E=(x,y,rx,ry,fill,ol)=>draw(()=>cx.ellipse(x,y+bob,rx,ry,0,0,7),fill,ol);
  const RR=(x,y,w,h,r,fill,ol)=>draw(()=>cx.roundRect(x,y+bob,w,h,r),fill,ol);
@@ -336,12 +336,12 @@ for(const k in ST){const d=document.createElement('div');d.className='ag';d.inne
 const trayEl=document.createElement('div');trayEl.className='tray';{const[sx,sy]=iso(TRAY[0]+.5,TRAY[1]+.5);trayEl.style.left=(sx/CW*100)+'%';trayEl.style.top=((sy-30)/CH*100)+'%'}ov.appendChild(trayEl);
 let hov=null;const stage=document.querySelector('.stage');
 function pick(ev){const r=cv.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*CW,y=(ev.clientY-r.top)/r.height*CH;let best=null,bd=1e9;
- for(const k in AG){const a=AG[k],[sx,sy]=iso(a.x+.5,a.y+.5),fy=sy+6;if(x>sx-17&&x<sx+17&&y>fy-68&&y<fy+8){const d=Math.abs(x-sx)+Math.abs(y-(fy-30));if(d<bd){bd=d;best=k}}}return best}
+ for(const k in AG){const a=AG[k],[sx,sy]=iso(a.x+.5,a.y+.5),fy=sy+6;if(x>sx-22&&x<sx+22&&y>fy-90&&y<fy+10){const d=Math.abs(x-sx)+Math.abs(y-(fy-40));if(d<bd){bd=d;best=k}}}return best}
 stage.addEventListener('pointermove',ev=>{if(ev.target.closest('.win')){hov=null;return}const k=pick(ev);if(k!==hov)hov=k;cv.style.cursor=k?'pointer':'default'});
 stage.addEventListener('pointerleave',()=>{hov=null});
 stage.addEventListener('pointerdown',ev=>{if(ev.pointerType!=='mouse'&&!ev.target.closest('.win')){const k=pick(ev);hov=(k&&k!==hov)?k:null}});
 const COLOR={trab:'#35d07f',libre:'#8a93a6',alerta:'#ff5a4f',espera:'#ff5a4f'};
-function overlay(){for(const k in AG){const a=AG[k],e=els[k],[sx,sy]=iso(a.x+.5,a.y+.5);e.style.left=(sx/CW*100)+'%';e.style.top=((sy-66)/CH*100)+'%';
+function overlay(){for(const k in AG){const a=AG[k],e=els[k],[sx,sy]=iso(a.x+.5,a.y+.5);e.style.left=(sx/CW*100)+'%';e.style.top=((sy-88)/CH*100)+'%';
   const lab=e.querySelector('.lab');lab.querySelector('b').textContent=a.rol+' '+a.n;const iEl=lab.querySelector('i');iEl.textContent=a.st[0];iEl.style.display=a.st[1]==='libre'?'none':'block';
   lab.classList.toggle('esp',a.st[1]==='espera');lab.style.display=hov===k?'block':'none';const dot=e.querySelector('.dot');dot.classList.toggle('esp',a.st[1]==='espera'||a.st[1]==='alerta');e.style.zIndex=hov===k?5:1;e.style.setProperty('--c',COLOR[a.st[1]]||'#8a93a6');
   const b=e.querySelector('.bub');if(a.bub){b.style.display='block';b.textContent=a.bub;b.style.color=a.bcol||'#10151f'}else b.style.display='none'}}
